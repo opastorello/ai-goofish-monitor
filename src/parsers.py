@@ -6,12 +6,12 @@ from src.utils import safe_get
 
 
 async def _parse_search_results_json(json_data: dict, source: str) -> list:
-    """解析搜索API的JSON数据，返回基础商品信息列表。"""
+    """Analisa o JSON da API de busca e retorna a lista básica de produtos."""
     page_data = []
     try:
         items = await safe_get(json_data, "data", "resultList", default=[])
         if not items:
-            print(f"LOG: ({source}) API响应中未找到商品列表 (resultList)。")
+            print(f"LOG: ({source}) nenhum item encontrado em resultList na resposta da API.")
             if AI_DEBUG_MODE:
                 print(f"--- [SEARCH DEBUG] RAW JSON RESPONSE from {source} ---")
                 print(json.dumps(json_data, ensure_ascii=False, indent=2))
@@ -22,28 +22,28 @@ async def _parse_search_results_json(json_data: dict, source: str) -> list:
             main_data = await safe_get(item, "data", "item", "main", "exContent", default={})
             click_params = await safe_get(item, "data", "item", "main", "clickParam", "args", default={})
 
-            title = await safe_get(main_data, "title", default="未知标题")
+            title = await safe_get(main_data, "title", default="Título desconhecido")
             price_parts = await safe_get(main_data, "price", default=[])
-            price = "".join([str(p.get("text", "")) for p in price_parts if isinstance(p, dict)]).replace("当前价", "").strip() if isinstance(price_parts, list) else "价格异常"
+            price = "".join([str(p.get("text", "")) for p in price_parts if isinstance(p, dict)]).replace("当前价", "").strip() if isinstance(price_parts, list) else "Preço inválido"
             if "万" in price: price = f"¥{float(price.replace('¥', '').replace('万', '')) * 10000:.0f}"
-            area = await safe_get(main_data, "area", default="地区未知")
-            seller = await safe_get(main_data, "userNickName", default="匿名卖家")
+            area = await safe_get(main_data, "area", default="Área desconhecida")
+            seller = await safe_get(main_data, "userNickName", default="Vendedor anônimo")
             raw_link = await safe_get(item, "data", "item", "main", "targetUrl", default="")
             image_url = await safe_get(main_data, "picUrl", default="")
             pub_time_ts = click_params.get("publishTime", "")
-            item_id = await safe_get(main_data, "itemId", default="未知ID")
-            original_price = await safe_get(main_data, "oriPrice", default="暂无")
+            item_id = await safe_get(main_data, "itemId", default="ID desconhecido")
+            original_price = await safe_get(main_data, "oriPrice", default="N/D")
             wants_count = await safe_get(click_params, "wantNum", default='NaN')
 
 
             tags = []
             if await safe_get(click_params, "tag") == "freeship":
-                tags.append("包邮")
+                tags.append("Frete grátis")
             r1_tags = await safe_get(main_data, "fishTags", "r1", "tagList", default=[])
             for tag_item in r1_tags:
                 content = await safe_get(tag_item, "data", "content", default="")
                 if "验货宝" in content:
-                    tags.append("验货宝")
+                    tags.append("Inspeção verificada")
 
             page_data.append({
                 "商品标题": title,
@@ -54,28 +54,28 @@ async def _parse_search_results_json(json_data: dict, source: str) -> list:
                 "发货地区": area,
                 "卖家昵称": seller,
                 "商品链接": raw_link.replace("fleamarket://", "https://www.goofish.com/"),
-                "发布时间": datetime.fromtimestamp(int(pub_time_ts)/1000).strftime("%Y-%m-%d %H:%M") if pub_time_ts.isdigit() else "未知时间",
+                "发布时间": datetime.fromtimestamp(int(pub_time_ts)/1000).strftime("%Y-%m-%d %H:%M") if pub_time_ts.isdigit() else "Horário desconhecido",
                 "商品ID": item_id
             })
-        print(f"LOG: ({source}) 成功解析到 {len(page_data)} 条商品基础信息。")
+        print(f"LOG: ({source}) análise bem-sucedida de {len(page_data)} registros básicos de produto.")
         return page_data
     except Exception as e:
-        print(f"LOG: ({source}) JSON数据处理异常: {str(e)}")
+        print(f"LOG: ({source}) erro ao processar JSON: {str(e)}")
         return []
 
 
 async def calculate_reputation_from_ratings(ratings_json: list) -> dict:
-    """从原始评价API数据列表中，计算作为卖家和买家的好评数与好评率。"""
+    """Calcula contagens e taxas de avaliações positivas como vendedor e comprador."""
     seller_total = 0
     seller_positive = 0
     buyer_total = 0
     buyer_positive = 0
 
     for card in ratings_json:
-        # 使用 safe_get 保证安全访问
+        # Usa safe_get para acesso seguro
         data = await safe_get(card, 'cardData', default={})
         role_tag = await safe_get(data, 'rateTagList', 0, 'text', default='')
-        rate_type = await safe_get(data, 'rate') # 1=好评, 0=中评, -1=差评
+        rate_type = await safe_get(data, 'rate') # 1=positivo, 0=neutro, -1=negativo
 
         if "卖家" in role_tag:
             seller_total += 1
@@ -86,7 +86,7 @@ async def calculate_reputation_from_ratings(ratings_json: list) -> dict:
             if rate_type == 1:
                 buyer_positive += 1
 
-    # 计算比率，并处理除以零的情况
+    # Calcula proporções, lidando com divisão por zero
     seller_rate = f"{(seller_positive / seller_total * 100):.2f}%" if seller_total > 0 else "N/A"
     buyer_rate = f"{(buyer_positive / buyer_total * 100):.2f}%" if buyer_total > 0 else "N/A"
 
@@ -99,17 +99,17 @@ async def calculate_reputation_from_ratings(ratings_json: list) -> dict:
 
 
 async def _parse_user_items_data(items_json: list) -> list:
-    """解析用户主页的商品列表API的JSON数据。"""
+    """Analisa o JSON da lista de produtos do perfil do usuário."""
     parsed_list = []
     for card in items_json:
         data = card.get('cardData', {})
         status_code = data.get('itemStatus')
         if status_code == 0:
-            status_text = "在售"
+            status_text = "À venda"
         elif status_code == 1:
-            status_text = "已售"
+            status_text = "Vendido"
         else:
-            status_text = f"未知状态 ({status_code})"
+            status_text = f"Status desconhecido ({status_code})"
 
         parsed_list.append({
             "商品ID": data.get('id'),
@@ -122,7 +122,7 @@ async def _parse_user_items_data(items_json: list) -> list:
 
 
 async def parse_user_head_data(head_json: dict) -> dict:
-    """解析用户头部API的JSON数据。"""
+    """Analisa o JSON do cabeçalho do perfil do usuário."""
     data = head_json.get('data', {})
     ylz_tags = await safe_get(data, 'module', 'base', 'ylzTags', default=[])
     seller_credit, buyer_credit = {}, {}
@@ -143,16 +143,16 @@ async def parse_user_head_data(head_json: dict) -> dict:
 
 
 async def parse_ratings_data(ratings_json: list) -> list:
-    """解析评价列表API的JSON数据。"""
+    """Analisa o JSON da lista de avaliações."""
     parsed_list = []
     for card in ratings_json:
         data = await safe_get(card, 'cardData', default={})
-        rate_tag = await safe_get(data, 'rateTagList', 0, 'text', default='未知角色')
+        rate_tag = await safe_get(data, 'rateTagList', 0, 'text', default='Função desconhecida')
         rate_type = await safe_get(data, 'rate')
-        if rate_type == 1: rate_text = "好评"
-        elif rate_type == 0: rate_text = "中评"
-        elif rate_type == -1: rate_text = "差评"
-        else: rate_text = "未知"
+        if rate_type == 1: rate_text = "Positivo"
+        elif rate_type == 0: rate_text = "Neutro"
+        elif rate_type == -1: rate_text = "Negativo"
+        else: rate_text = "Desconhecido"
         parsed_list.append({
             "评价ID": data.get('rateId'),
             "评价内容": data.get('feedback'),

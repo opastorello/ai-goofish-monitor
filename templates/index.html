@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>闲鱼智能监控机器人 - 管理后台</title>
+    <title>Robô de Monitoramento Goofish - Painel de Administração</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         .status-badge {
@@ -154,17 +154,17 @@
 </head>
 <body>
 <header>
-    <h1>闲鱼智能监控机器人 - 管理后台</h1>
+    <h1>Robô de Monitoramento Goofish - Painel de Administração</h1>
     <div id="login-status-widget-container"></div>
 </header>
 <div class="container">
     <aside>
         <nav>
             <ul>
-                <li><a href="#tasks" class="nav-link active">任务管理</a></li>
-                <li><a href="#results" class="nav-link">结果查看</a></li>
-                <li><a href="#logs" class="nav-link">运行日志</a></li>
-                <li><a href="#settings" class="nav-link">系统设置</a></li>
+                <li><a href="#tasks" class="nav-link active">Gerenciamento de tarefas</a></li>
+                <li><a href="#results" class="nav-link">Visualizar resultados</a></li>
+                <li><a href="#logs" class="nav-link">Logs de execução</a></li>
+                <li><a href="#settings" class="nav-link">Configurações do sistema</a></li>
             </ul>
         </nav>
     </aside>
@@ -177,58 +177,58 @@
 <div id="add-task-modal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>创建新监控任务 (AI驱动)</h2>
+            <h2>Criar nova tarefa de monitoramento (IA)</h2>
             <button id="close-modal-btn" class="close-button">&times;</button>
         </div>
         <div class="modal-body">
             <form id="add-task-form">
                 <div class="form-group">
-                    <label for="task-name">任务名称</label>
-                    <input type="text" id="task-name" name="task_name" placeholder="例如：索尼 A7M4 相机" required>
+                    <label for="task-name">Nome da tarefa</label>
+                    <input type="text" id="task-name" name="task_name" placeholder="Ex.: Câmera Sony A7M4" required>
                 </div>
                 <div class="form-group">
-                    <label for="keyword">搜索关键词</label>
-                    <input type="text" id="keyword" name="keyword" placeholder="例如：a7m4" required>
+                    <label for="keyword">Palavra-chave de busca</label>
+                    <input type="text" id="keyword" name="keyword" placeholder="Ex.: a7m4" required>
                 </div>
                 <div class="form-group form-group-inline">
                     <div>
-                        <label for="min-price">价格范围 (可选)</label>
-                        <input type="number" id="min-price" name="min_price" placeholder="最低价">
+                        <label for="min-price">Faixa de preço (opcional)</label>
+                        <input type="number" id="min-price" name="min_price" placeholder="Preço mínimo">
                     </div>
                     <span>-</span>
                     <div>
                         <label for="max-price">&nbsp;</label>
-                        <input type="number" id="max-price" name="max_price" placeholder="最高价">
+                        <input type="number" id="max-price" name="max_price" placeholder="Preço máximo">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="max-pages">最大搜索页数</label>
+                    <label for="max-pages">Máximo de páginas de busca</label>
                     <input type="number" id="max-pages" name="max_pages" value="3" min="1" required>
                 </div>
                 <div class="form-group">
-                    <label for="task-cron">定时执行 (Cron 表达式) <a href="https://crontab.guru/" target="_blank"
-                                                                     title="点击查看Cron表达式帮助">[?]</a></label>
-                    <input type="text" id="task-cron" name="cron" placeholder="分 时 日 月 周 (例如: 0 8 * * *)">
-                    <p class="form-hint">留空则不启用定时执行。例如 "0 22 * * *" 表示每晚22:00执行。</p>
+                    <label for="task-cron">Agendamento (expressão Cron) <a href="https://crontab.guru/" target="_blank"
+                                                                     title="Clique para ver ajuda sobre expressões Cron">[?]</a></label>
+                    <input type="text" id="task-cron" name="cron" placeholder="Min Hora Dia Mês Semana (ex.: 0 8 * * *)">
+                    <p class="form-hint">Deixe em branco para não agendar. Ex.: "0 22 * * *" executa às 22h todos os dias.</p>
                 </div>
                 <div class="form-group">
-                    <label for="task-description">详细购买需求</label>
+                    <label for="task-description">Detalhe o que deseja comprar</label>
                     <textarea id="task-description" name="description" rows="6"
-                              placeholder="请用自然语言详细描述你的购买需求，AI将根据此描述生成分析标准。例如：我想买一台95新以上的索尼A7M4相机，预算在10000到13000元之间，快门数要低于5000。必须是国行且配件齐全。优先考虑个人卖家..."
+                              placeholder="Descreva em linguagem natural sua necessidade; a IA vai gerar os critérios. Ex.: Quero comprar uma câmera Sony A7M4 com 95% de conservação ou mais, orçamento entre 10.000 e 13.000, obturador abaixo de 5.000. Precisa ser versão nacional com acessórios completos. Prefiro vendedores particulares..."
                               required></textarea>
                 </div>
                 <div class="form-group">
                     <label>
                         <input type="checkbox" id="personal-only" name="personal_only" checked>
-                        仅筛选个人闲置卖家
+                        Filtrar apenas vendedores particulares
                     </label>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
-            <button id="cancel-add-task-btn" class="control-button">取消</button>
+            <button id="cancel-add-task-btn" class="control-button">Cancelar</button>
             <button id="save-new-task-btn" class="control-button primary-btn">
-                <span class="btn-text">创建任务</span>
+                <span class="btn-text">Criar tarefa</span>
                 <span class="spinner" style="display: none;"></span>
             </button>
         </div>
@@ -240,23 +240,23 @@
 <div id="refresh-criteria-modal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>重新生成AI标准</h2>
+            <h2>Gerar critérios da IA novamente</h2>
             <button id="close-refresh-criteria-btn" class="close-button">&times;</button>
         </div>
         <div class="modal-body">
             <form id="refresh-criteria-form">
                 <div class="form-group">
-                    <label for="refresh-criteria-description">详细购买需求</label>
+                    <label for="refresh-criteria-description">Detalhe o que deseja comprar</label>
                     <textarea id="refresh-criteria-description" name="description" rows="6"
-                              placeholder="请用自然语言详细描述你的购买需求，AI将根据此描述生成分析标准。例如：我想买一台95新以上的索尼A7M4相机，预算在10000到13000元之间，快门数要低于5000。必须是国行且配件齐全。优先考虑个人卖家..."
+                              placeholder="Descreva em linguagem natural sua necessidade; a IA vai gerar os critérios. Ex.: Quero comprar uma câmera Sony A7M4 com 95% de conservação ou mais, orçamento entre 10.000 e 13.000, obturador abaixo de 5.000. Precisa ser versão nacional com acessórios completos. Prefiro vendedores particulares..."
                               required></textarea>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
-            <button id="cancel-refresh-criteria-btn" class="control-button">取消</button>
+            <button id="cancel-refresh-criteria-btn" class="control-button">Cancelar</button>
             <button id="refresh-criteria-btn" class="control-button primary-btn">
-                <span class="btn-text">重新生成</span>
+                <span class="btn-text">Gerar novamente</span>
                 <span class="spinner" style="display: none;"></span>
             </button>
         </div>
@@ -267,7 +267,7 @@
 <div id="json-viewer-modal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>AI 分析详情</h2>
+            <h2>Detalhes da análise da IA</h2>
             <button id="close-json-viewer-btn" class="close-button">&times;</button>
         </div>
         <div class="modal-body">
@@ -280,37 +280,37 @@
 <div id="login-state-modal" class="modal-overlay" style="display: none;">
     <div class="modal-content large">
         <div class="modal-header">
-            <h2>手动更新登录状态 (Cookie)</h2>
+            <h2>Atualizar status de login manualmente (Cookie)</h2>
             <button id="close-login-state-modal-btn" class="close-button">&times;</button>
         </div>
         <div class="modal-body">
             <form id="login-state-form" onsubmit="return false;">
 
                 <!-- Chrome Extension Method -->
-                <h3 style="margin-top: 20px; margin-bottom: 10px;">使用Chrome扩展（推荐）</h3>
-                <p>此方法用于在无法运行图形化浏览器的服务器上更新闲鱼登录凭证。</p>
-                <p>安装Chrome扩展来提取闲鱼登录状态：</p>
+                <h3 style="margin-top: 20px; margin-bottom: 10px;">Usar extensão do Chrome (recomendado)</h3>
+                <p>Use este método para atualizar as credenciais do Goofish em servidores sem navegador gráfico.</p>
+                <p>Instale a extensão do Chrome para extrair o status de login do Goofish:</p>
                 <ol class="instructions">
-                    <li>在Chrome浏览器中安装 <a href="https://chromewebstore.google.com/detail/xianyu-login-state-extrac/eidlpfjiodpigmfcahkmlenhppfklcoa" target="_blank"
-                                                rel="noopener noreferrer">闲鱼登录状态提取扩展</a></li>
-                    <li>打开并登录 <a href="https://www.goofish.com" target="_blank"
-                                      rel="noopener noreferrer">闲鱼官网</a>。
+                    <li>Instale no Chrome a <a href="https://chromewebstore.google.com/detail/xianyu-login-state-extrac/eidlpfjiodpigmfcahkmlenhppfklcoa" target="_blank"
+                                                rel="noopener noreferrer">extensão de extração de login do Goofish</a></li>
+                    <li>Abra e faça login em <a href="https://www.goofish.com" target="_blank"
+                                      rel="noopener noreferrer">goofish.com</a>。
                     </li>
-                    <li>登录成功后，点击浏览器工具栏中的该扩展图标。</li>
-                    <li>点击"提取登录状态"按钮获取登录信息。</li>
-                    <li>点击"复制到剪贴板"按钮。</li>
-                    <li>将复制的内容粘贴到下方的文本框中，然后点击"保存"。</li>
+                    <li>Depois de logar, clique no ícone da extensão na barra do navegador.</li>
+                    <li>Clique em "Extrair status de login" para obter as informações.</li>
+                    <li>Clique em "Copiar para a área de transferência".</li>
+                    <li>Cole o conteúdo copiado no campo abaixo e clique em "Salvar".</li>
                 </ol>
                 <div class="form-group">
-                    <label for="login-state-content">粘贴JSON内容:</label>
+                    <label for="login-state-content">Cole o conteúdo JSON:</label>
                     <textarea id="login-state-content" name="content" rows="8"
-                              placeholder="请在此处粘贴从浏览器扩展复制的JSON文本..."></textarea>
+                              placeholder="Cole aqui o JSON copiado da extensão do navegador..."></textarea>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
-            <button id="cancel-login-state-btn" type="button" class="control-button">取消</button>
-            <button id="save-login-state-btn" type="button" class="control-button primary-btn">保存</button>
+            <button id="cancel-login-state-btn" type="button" class="control-button">Cancelar</button>
+            <button id="save-login-state-btn" type="button" class="control-button primary-btn">Salvar</button>
         </div>
     </div>
 </div>

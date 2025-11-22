@@ -14,7 +14,7 @@ from requests.exceptions import HTTPError
 
 def retry_on_failure(retries=3, delay=5):
     """
-    一个通用的异步重试装饰器，增加了对HTTP错误的详细日志记录。
+    Um decorador de retry assíncrono genérico com registros detalhados para erros HTTP.
     """
     def decorator(func):
         @wraps(func)
@@ -23,30 +23,30 @@ def retry_on_failure(retries=3, delay=5):
                 try:
                     return await func(*args, **kwargs)
                 except (APIStatusError, HTTPError) as e:
-                    print(f"函数 {func.__name__} 第 {i + 1}/{retries} 次尝试失败，发生HTTP错误。")
+                    print(f"Função {func.__name__} falhou na tentativa {i + 1}/{retries} com erro HTTP.")
                     if hasattr(e, 'status_code'):
-                        print(f"  - 状态码 (Status Code): {e.status_code}")
+                        print(f"  - Código de status: {e.status_code}")
                     if hasattr(e, 'response') and hasattr(e.response, 'text'):
                         response_text = e.response.text
                         print(
-                            f"  - 返回值 (Response): {response_text[:300]}{'...' if len(response_text) > 300 else ''}")
+                            f"  - Resposta: {response_text[:300]}{'...' if len(response_text) > 300 else ''}")
                 except json.JSONDecodeError as e:
-                    print(f"函数 {func.__name__} 第 {i + 1}/{retries} 次尝试失败: JSON解析错误 - {e}")
+                    print(f"Função {func.__name__} falhou na tentativa {i + 1}/{retries}: erro ao analisar JSON - {e}")
                 except Exception as e:
-                    print(f"函数 {func.__name__} 第 {i + 1}/{retries} 次尝试失败: {type(e).__name__} - {e}")
+                    print(f"Função {func.__name__} falhou na tentativa {i + 1}/{retries}: {type(e).__name__} - {e}")
 
                 if i < retries - 1:
-                    print(f"将在 {delay} 秒后重试...")
+                    print(f"Tentando novamente em {delay} segundos...")
                     await asyncio.sleep(delay)
 
-            print(f"函数 {func.__name__} 在 {retries} 次尝试后彻底失败。")
+            print(f"Função {func.__name__} falhou completamente após {retries} tentativas.")
             return None
         return wrapper
     return decorator
 
 
-async def safe_get(data, *keys, default="暂无"):
-    """安全获取嵌套字典值"""
+async def safe_get(data, *keys, default="N/A"):
+    """Obtém valores de dicionários aninhados com segurança."""
     for key in keys:
         try:
             data = data[key]
@@ -56,14 +56,14 @@ async def safe_get(data, *keys, default="暂无"):
 
 
 async def random_sleep(min_seconds: float, max_seconds: float):
-    """异步等待一个在指定范围内的随机时间。"""
+    """Aguarda de forma assíncrona um tempo aleatório dentro do intervalo fornecido."""
     delay = random.uniform(min_seconds, max_seconds)
-    print(f"   [延迟] 等待 {delay:.2f} 秒... (范围: {min_seconds}-{max_seconds}s)")
+    print(f"   [Atraso] Esperando {delay:.2f} segundos... (intervalo: {min_seconds}-{max_seconds}s)")
     await asyncio.sleep(delay)
 
 
 def log_time(message: str, prefix: str = "") -> None:
-    """在日志前加上 YY-MM-DD HH:MM:SS 时间戳的简单打印。"""
+    """Registra mensagens com timestamp no formato YY-MM-DD HH:MM:SS."""
     try:
         ts = datetime.now().strftime(' %Y-%m-%d %H:%M:%S')
     except Exception:
@@ -73,7 +73,7 @@ def log_time(message: str, prefix: str = "") -> None:
 
 def convert_goofish_link(url: str) -> str:
     """
-    将Goofish商品链接转换为只包含商品ID的手机端格式。
+    Converte um link de produto do Goofish para o formato móvel contendo apenas o ID.
     """
     match_first_link = re.search(r'item\?id=(\d+)', url)
     if match_first_link:
@@ -84,12 +84,12 @@ def convert_goofish_link(url: str) -> str:
 
 
 def get_link_unique_key(link: str) -> str:
-    """截取链接中第一个"&"之前的内容作为唯一标识依据。"""
+    """Usa o conteúdo antes do primeiro "&" como chave única do link."""
     return link.split('&', 1)[0]
 
 
 async def save_to_jsonl(data_record: dict, keyword: str):
-    """将一个包含商品和卖家信息的完整记录追加保存到 .jsonl 文件。"""
+    """Acrescenta um registro completo de produto e vendedor a um arquivo .jsonl."""
     output_dir = "jsonl"
     os.makedirs(output_dir, exist_ok=True)
     filename = os.path.join(output_dir, f"{keyword.replace(' ', '_')}_full_data.jsonl")
@@ -98,16 +98,16 @@ async def save_to_jsonl(data_record: dict, keyword: str):
             f.write(json.dumps(data_record, ensure_ascii=False) + "\n")
         return True
     except IOError as e:
-        print(f"写入文件 {filename} 出错: {e}")
+        print(f"Erro ao gravar o arquivo {filename}: {e}")
         return False
 
 
 def format_registration_days(total_days: int) -> str:
     """
-    将总天数格式化为“X年Y个月”的字符串。
+    Formata o total de dias em uma string “X anos Y meses”.
     """
     if not isinstance(total_days, int) or total_days <= 0:
-        return '未知'
+        return 'Desconhecido'
 
     DAYS_IN_YEAR = 365.25
     DAYS_IN_MONTH = DAYS_IN_YEAR / 12
@@ -121,10 +121,10 @@ def format_registration_days(total_days: int) -> str:
         months = 0
 
     if years > 0 and months > 0:
-        return f"来闲鱼{years}年{months}个月"
+        return f"Na Xianyu há {years} ano(s) e {months} mês(es)"
     elif years > 0 and months == 0:
-        return f"来闲鱼{years}年整"
+        return f"Na Xianyu há {years} ano(s)"
     elif years == 0 and months > 0:
-        return f"来闲鱼{months}个月"
+        return f"Na Xianyu há {months} mês(es)"
     else:
-        return "来闲鱼不足一个月"
+        return "Na Xianyu há menos de um mês"
