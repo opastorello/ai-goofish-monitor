@@ -45,44 +45,44 @@ from src.utils import (
 
 async def scrape_user_profile(context, user_id: str) -> dict:
     """
-    【新版】访问指定用户的个人主页，按顺序采集其摘要信息、完整的商品列表和完整的评价列表。
+    [Versão nova] Acessa o perfil do usuário especificado e coleta em sequência o resumo, a lista completa de produtos e a lista completa de avaliações.
     """
-    print(f"   -> 开始采集用户ID: {user_id} 的完整信息...")
+    print(f"   -> Iniciando a coleta completa das informações do usuário {user_id}...")
     profile_data = {}
     page = await context.new_page()
 
-    # 为各项异步任务准备Future和数据容器
+    # Preparar Futures e contêineres de dados para cada tarefa assíncrona
     head_api_future = asyncio.get_event_loop().create_future()
 
     all_items, all_ratings = [], []
     stop_item_scrolling, stop_rating_scrolling = asyncio.Event(), asyncio.Event()
 
     async def handle_response(response: Response):
-        # 捕获头部摘要API
+        # Capturar a API de resumo do cabeçalho
         if "mtop.idle.web.user.page.head" in response.url and not head_api_future.done():
             try:
                 head_api_future.set_result(await response.json())
-                print(f"      [API捕获] 用户头部信息... 成功")
+                print(f"      [Captura de API] Informações do cabeçalho do usuário... sucesso")
             except Exception as e:
                 if not head_api_future.done(): head_api_future.set_exception(e)
 
-        # 捕获商品列表API
+        # Capturar a API da lista de produtos
         elif "mtop.idle.web.xyh.item.list" in response.url:
             try:
                 data = await response.json()
                 all_items.extend(data.get('data', {}).get('cardList', []))
-                print(f"      [API捕获] 商品列表... 当前已捕获 {len(all_items)} 件")
+                print(f"      [Captura de API] Lista de produtos... {len(all_items)} itens coletados até agora")
                 if not data.get('data', {}).get('nextPage', True):
                     stop_item_scrolling.set()
             except Exception as e:
                 stop_item_scrolling.set()
 
-        # 捕获评价列表API
+        # Capturar a API da lista de avaliações
         elif "mtop.idle.web.trade.rate.list" in response.url:
             try:
                 data = await response.json()
                 all_ratings.extend(data.get('data', {}).get('cardList', []))
-                print(f"      [API捕获] 评价列表... 当前已捕获 {len(all_ratings)} 条")
+                print(f"      [Captura de API] Lista de avaliações... {len(all_ratings)} registros coletados até agora")
                 if not data.get('data', {}).get('nextPage', True):
                     stop_rating_scrolling.set()
             except Exception as e:
@@ -91,58 +91,58 @@ async def scrape_user_profile(context, user_id: str) -> dict:
     page.on("response", handle_response)
 
     try:
-        # --- 任务1: 导航并采集头部信息 ---
+        # --- Tarefa 1: navegar e coletar as informações do cabeçalho ---
         await page.goto(f"https://www.goofish.com/personal?userId={user_id}", wait_until="domcontentloaded", timeout=20000)
         head_data = await asyncio.wait_for(head_api_future, timeout=15)
         profile_data = await parse_user_head_data(head_data)
 
-        # --- 任务2: 滚动加载所有商品 (默认页面) ---
-        print("      [采集阶段] 开始采集该用户的商品列表...")
-        await random_sleep(2, 4) # 等待第一页商品API完成
+        # --- Tarefa 2: rolar para carregar todos os produtos (página padrão) ---
+        print("      [Coleta] Iniciando a coleta da lista de produtos deste usuário...")
+        await random_sleep(2, 4) # aguardar a conclusão da API da primeira página
         while not stop_item_scrolling.is_set():
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
             try:
                 await asyncio.wait_for(stop_item_scrolling.wait(), timeout=8)
             except asyncio.TimeoutError:
-                print("      [滚动超时] 商品列表可能已加载完毕。")
+                print("      [Rolagem expirou] A lista de produtos provavelmente já foi carregada.")
                 break
         profile_data["卖家发布的商品列表"] = await _parse_user_items_data(all_items)
 
-        # --- 任务3: 点击并采集所有评价 ---
-        print("      [采集阶段] 开始采集该用户的评价列表...")
+        # --- Tarefa 3: clicar e coletar todas as avaliações ---
+        print("      [Coleta] Iniciando a coleta da lista de avaliações deste usuário...")
         rating_tab_locator = page.locator("//div[text()='信用及评价']/ancestor::li")
         if await rating_tab_locator.count() > 0:
             await rating_tab_locator.click()
-            await random_sleep(3, 5) # 等待第一页评价API完成
+            await random_sleep(3, 5) # aguardar a conclusão da API da primeira página de avaliações
 
             while not stop_rating_scrolling.is_set():
                 await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
                 try:
                     await asyncio.wait_for(stop_rating_scrolling.wait(), timeout=8)
                 except asyncio.TimeoutError:
-                    print("      [滚动超时] 评价列表可能已加载完毕。")
+                    print("      [Rolagem expirou] A lista de avaliações provavelmente já foi carregada.")
                     break
 
             profile_data['卖家收到的评价列表'] = await parse_ratings_data(all_ratings)
             reputation_stats = await calculate_reputation_from_ratings(all_ratings)
             profile_data.update(reputation_stats)
         else:
-            print("      [警告] 未找到评价选项卡，跳过评价采集。")
+            print("      [Aviso] Aba de avaliações não encontrada; coleta de avaliações ignorada.")
 
     except Exception as e:
-        print(f"   [错误] 采集用户 {user_id} 信息时发生错误: {e}")
+        print(f"   [Erro] Falha ao coletar informações do usuário {user_id}: {e}")
     finally:
         page.remove_listener("response", handle_response)
         await page.close()
-        print(f"   -> 用户 {user_id} 信息采集完成。")
+        print(f"   -> Coleta de informações do usuário {user_id} concluída.")
 
     return profile_data
 
 
 async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
     """
-    【核心执行器】
-    根据单个任务配置，异步爬取闲鱼商品数据，并对每个新发现的商品进行实时的、独立的AI分析和通知。
+    [Executor principal]
+    Com base na configuração de cada tarefa, coleta assincronamente dados de produtos do Goofish e executa análises de IA e notificações independentes em tempo real para cada novo item encontrado.
     """
     keyword = task_config['keyword']
     max_pages = task_config.get('max_pages', 1)
@@ -157,7 +157,7 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
     processed_links = set()
     output_filename = os.path.join("jsonl", f"{keyword.replace(' ', '_')}_full_data.jsonl")
     if os.path.exists(output_filename):
-        print(f"LOG: 发现已存在文件 {output_filename}，正在加载历史记录以去重...")
+        print(f"LOG: Arquivo existente {output_filename} encontrado; carregando histórico para remover duplicatas...")
         try:
             with open(output_filename, 'r', encoding='utf-8') as f:
                 for line in f:
@@ -167,18 +167,18 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                         if link:
                             processed_links.add(get_link_unique_key(link))
                     except json.JSONDecodeError:
-                        print(f"   [警告] 文件中有一行无法解析为JSON，已跳过。")
-            print(f"LOG: 加载完成，已记录 {len(processed_links)} 个已处理过的商品。")
+                        print(f"   [Aviso] Uma linha do arquivo não pôde ser analisada como JSON e foi ignorada.")
+            print(f"LOG: Carregamento concluído; {len(processed_links)} produtos já processados registrados.")
         except IOError as e:
-            print(f"   [警告] 读取历史文件时发生错误: {e}")
+            print(f"   [Aviso] Erro ao ler o arquivo de histórico: {e}")
     else:
-        print(f"LOG: 输出文件 {output_filename} 不存在，将创建新文件。")
+        print(f"LOG: O arquivo de saída {output_filename} não existe; um novo arquivo será criado.")
 
     async with async_playwright() as p:
         if LOGIN_IS_EDGE:
             browser = await p.chromium.launch(headless=RUN_HEADLESS, channel="msedge")
         else:
-            # Docker环境内，使用Playwright自带的chromium；本地环境，使用系统安装的Chrome
+            # Em ambiente Docker, usar o Chromium do Playwright; em ambiente local, usar o Chrome instalado no sistema
             if RUNNING_IN_DOCKER:
                 browser = await p.chromium.launch(headless=RUN_HEADLESS)
             else:
@@ -187,81 +187,81 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
         page = await context.new_page()
 
         try:
-            log_time("步骤 1 - 直接导航到搜索结果页...")
-            # 使用 'q' 参数构建正确的搜索URL，并进行URL编码
+            log_time("Etapa 1 - navegando diretamente para a página de resultados de busca...")
+            # Usar o parâmetro 'q' para montar a URL de busca correta, com codificação de URL
             params = {'q': keyword}
             search_url = f"https://www.goofish.com/search?{urlencode(params)}"
-            log_time(f"目标URL: {search_url}")
+            log_time(f"URL de destino: {search_url}")
 
-            # 使用 expect_response 在导航的同时捕获初始搜索的API数据
+            # Usar expect_response para capturar os dados da API da busca inicial durante a navegação
             async with page.expect_response(lambda r: API_URL_PATTERN in r.url, timeout=30000) as response_info:
                 await page.goto(search_url, wait_until="domcontentloaded", timeout=60000)
 
             initial_response = await response_info.value
 
-            # 等待页面加载出关键筛选元素，以确认已成功进入搜索结果页
+            # Aguarda o carregamento dos elementos de filtro principais para confirmar a chegada à página de resultados
             await page.wait_for_selector('text=新发布', timeout=15000)
 
-            # --- 新增：检查是否存在验证弹窗 ---
+            # --- Novo: verificar se existe um pop-up de validação ---
             baxia_dialog = page.locator("div.baxia-dialog-mask")
             middleware_widget = page.locator("div.J_MIDDLEWARE_FRAME_WIDGET")
             try:
-                # 等待弹窗在2秒内出现。如果出现，则执行块内代码。
+                # Aguardar até 2 segundos para o pop-up aparecer. Caso apareça, executar o bloco abaixo.
                 await baxia_dialog.wait_for(state='visible', timeout=2000)
                 print("\n==================== CRITICAL BLOCK DETECTED ====================")
-                print("检测到闲鱼反爬虫验证弹窗 (baxia-dialog)，无法继续操作。")
-                print("这通常是因为操作过于频繁或被识别为机器人。")
-                print("建议：")
-                print("1. 停止脚本一段时间再试。")
-                print("2. (推荐) 在 .env 文件中设置 RUN_HEADLESS=false，以非无头模式运行，这有助于绕过检测。")
-                print(f"任务 '{keyword}' 将在此处中止。")
+                print("Foi detectado um pop-up anti-robô do Goofish (baxia-dialog); não é possível continuar.")
+                print("Isso geralmente ocorre por excesso de requisições ou por identificação como robô.")
+                print("Recomendações:")
+                print("1. Interrompa o script por um tempo antes de tentar novamente.")
+                print("2. (Recomendado) Defina RUN_HEADLESS=false no arquivo .env para executar em modo não headless, o que ajuda a evitar a detecção.")
+                print(f"A tarefa '{keyword}' será interrompida aqui.")
                 print("===================================================================")
                 await browser.close()
                 return processed_item_count
             except PlaywrightTimeoutError:
-                # 2秒内弹窗未出现，这是正常情况，继续执行
+                # O pop-up não apareceu em 2 segundos, que é o comportamento esperado; continuar
                 pass
-            
-            # 检查是否有J_MIDDLEWARE_FRAME_WIDGET覆盖层
+
+            # Verificar se existe a camada de bloqueio J_MIDDLEWARE_FRAME_WIDGET
             try:
                 await middleware_widget.wait_for(state='visible', timeout=2000)
                 print("\n==================== CRITICAL BLOCK DETECTED ====================")
-                print("检测到闲鱼反爬虫验证弹窗 (J_MIDDLEWARE_FRAME_WIDGET)，无法继续操作。")
-                print("这通常是因为操作过于频繁或被识别为机器人。")
-                print("建议：")
-                print("1. 停止脚本一段时间再试。")
-                print("2. (推荐) 更新登录状态文件，确保登录状态有效。")
-                print("3. 降低任务执行频率，避免被识别为机器人。")
-                print(f"任务 '{keyword}' 将在此处中止。")
+                print("Foi detectado um pop-up anti-robô do Goofish (J_MIDDLEWARE_FRAME_WIDGET); não é possível continuar.")
+                print("Isso geralmente ocorre por excesso de requisições ou por identificação como robô.")
+                print("Recomendações:")
+                print("1. Interrompa o script por um tempo antes de tentar novamente.")
+                print("2. (Recomendado) Atualize o arquivo de estado de login para garantir que o login ainda seja válido.")
+                print("3. Reduza a frequência de execução das tarefas para evitar ser identificado como robô.")
+                print(f"A tarefa '{keyword}' será interrompida aqui.")
                 print("===================================================================")
                 await browser.close()
                 return processed_item_count
             except PlaywrightTimeoutError:
-                # 2秒内弹窗未出现，这是正常情况，继续执行
+                # O pop-up não apareceu em 2 segundos, que é o comportamento esperado; continuar
                 pass
-            # --- 结束新增 ---
+            # --- Fim do bloco novo ---
 
             try:
                 await page.click("div[class*='closeIconBg']", timeout=3000)
-                print("LOG: 已关闭广告弹窗。")
+                print("LOG: Pop-up de anúncio fechado.")
             except PlaywrightTimeoutError:
-                print("LOG: 未检测到广告弹窗。")
+                print("LOG: Nenhum pop-up de anúncio detectado.")
 
             final_response = None
-            log_time("步骤 2 - 应用筛选条件...")
+            log_time("Etapa 2 - aplicando filtros...")
             await page.click('text=新发布')
-            await random_sleep(2, 4) # 原来是 (1.5, 2.5)
+            await random_sleep(2, 4) # antes: (1.5, 2.5)
             async with page.expect_response(lambda r: API_URL_PATTERN in r.url, timeout=20000) as response_info:
                 await page.click('text=最新')
-                # --- 修改: 增加排序后的等待时间 ---
-                await random_sleep(4, 7) # 原来是 (3, 5)
+                # --- Ajuste: tempo de espera maior após aplicar a ordenação ---
+                await random_sleep(4, 7) # antes: (3, 5)
             final_response = await response_info.value
 
             if personal_only:
                 async with page.expect_response(lambda r: API_URL_PATTERN in r.url, timeout=20000) as response_info:
                     await page.click('text=个人闲置')
-                    # --- 修改: 将固定等待改为随机等待，并加长 ---
-                    await random_sleep(4, 6) # 原来是 asyncio.sleep(5)
+                    # --- Ajuste: substituir a espera fixa por espera aleatória mais longa ---
+                    await random_sleep(4, 6) # antes era asyncio.sleep(5)
                 final_response = await response_info.value
 
             if min_price or max_price:
@@ -269,65 +269,65 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                 if await price_container.is_visible():
                     if min_price:
                         await price_container.get_by_placeholder("¥").first.fill(min_price)
-                        # --- 修改: 将固定等待改为随机等待 ---
-                        await random_sleep(1, 2.5) # 原来是 asyncio.sleep(5)
+                        # --- Ajuste: substituir a espera fixa por espera aleatória ---
+                        await random_sleep(1, 2.5) # antes era asyncio.sleep(5)
                     if max_price:
                         await price_container.get_by_placeholder("¥").nth(1).fill(max_price)
-                        # --- 修改: 将固定等待改为随机等待 ---
-                        await random_sleep(1, 2.5) # 原来是 asyncio.sleep(5)
+                        # --- Ajuste: substituir a espera fixa por espera aleatória ---
+                        await random_sleep(1, 2.5) # antes era asyncio.sleep(5)
 
                     async with page.expect_response(lambda r: API_URL_PATTERN in r.url, timeout=20000) as response_info:
                         await page.keyboard.press('Tab')
-                        # --- 修改: 增加确认价格后的等待时间 ---
-                        await random_sleep(4, 7) # 原来是 asyncio.sleep(5)
+                        # --- Ajuste: aumentar o tempo de espera após confirmar os preços ---
+                        await random_sleep(4, 7) # antes era asyncio.sleep(5)
                     final_response = await response_info.value
                 else:
-                    print("LOG: 警告 - 未找到价格输入容器。")
+                    print("LOG: Aviso - contêiner de preço não encontrado.")
 
-            log_time("所有筛选已完成，开始处理商品列表...")
+            log_time("Todos os filtros foram aplicados; começando a processar a lista de produtos...")
 
             current_response = final_response if final_response and final_response.ok else initial_response
             for page_num in range(1, max_pages + 1):
                 if stop_scraping: break
-                log_time(f"开始处理第 {page_num}/{max_pages} 页 ...")
+                log_time(f"Iniciando o processamento da página {page_num}/{max_pages} ...")
 
                 if page_num > 1:
-                    # 查找未被禁用的“下一页”按钮。闲鱼通过添加 'disabled' 类名来禁用按钮，而不是使用 disabled 属性。
+                    # Localizar o botão "Próxima página" não desativado. O Goofish usa a classe 'disabled' em vez do atributo disabled.
                     next_btn = page.locator("[class*='search-pagination-arrow-right']:not([class*='disabled'])")
                     if not await next_btn.count():
-                        log_time("已到达最后一页，未找到可用的‘下一页’按钮，停止翻页。")
+                        log_time("Última página alcançada; nenhum botão 'Próxima página' disponível. Parando a navegação.")
                         break
                     try:
                         async with page.expect_response(lambda r: API_URL_PATTERN in r.url, timeout=20000) as response_info:
                             await next_btn.click()
-                            # --- 修改: 增加翻页后的等待时间 ---
-                            await random_sleep(5, 8) # 原来是 (1.5, 3.5)
+                            # --- Ajuste: aumentar o tempo de espera após mudar de página ---
+                            await random_sleep(5, 8) # antes era (1.5, 3.5)
                         current_response = await response_info.value
                     except PlaywrightTimeoutError:
-                        log_time(f"翻页到第 {page_num} 页超时，停止翻页。")
+                        log_time(f"Tempo limite ao avançar para a página {page_num}; interrompendo a navegação.")
                         break
 
                 if not (current_response and current_response.ok):
-                    log_time(f"第 {page_num} 页响应无效，跳过。")
+                    log_time(f"Resposta inválida na página {page_num}; ignorando.")
                     continue
 
-                basic_items = await _parse_search_results_json(await current_response.json(), f"第 {page_num} 页")
+                basic_items = await _parse_search_results_json(await current_response.json(), f"Página {page_num}")
                 if not basic_items: break
 
                 total_items_on_page = len(basic_items)
                 for i, item_data in enumerate(basic_items, 1):
                     if debug_limit > 0 and processed_item_count >= debug_limit:
-                        log_time(f"已达到调试上限 ({debug_limit})，停止获取新商品。")
+                        log_time(f"Limite de depuração atingido ({debug_limit}); parando a captura de novos produtos.")
                         stop_scraping = True
                         break
 
                     unique_key = get_link_unique_key(item_data["商品链接"])
                     if unique_key in processed_links:
-                        log_time(f"[页内进度 {i}/{total_items_on_page}] 商品 '{item_data['商品标题'][:20]}...' 已存在，跳过。")
+                        log_time(f"[Progresso na página {i}/{total_items_on_page}] Produto '{item_data['商品标题'][:20]}...' já existe; ignorando.")
                         continue
 
-                    log_time(f"[页内进度 {i}/{total_items_on_page}] 发现新商品，获取详情: {item_data['商品标题'][:30]}...")
-                    # --- 修改: 访问详情页前的等待时间，模拟用户在列表页上看了一会儿 ---
+                    log_time(f"[Progresso na página {i}/{total_items_on_page}] Novo produto encontrado; obtendo detalhes: {item_data['商品标题'][:30]}...")
+                    # --- Ajuste: tempo de espera antes de abrir a página de detalhes, simulando um usuário lendo a lista ---
                     await random_sleep(3, 6) # 原来是 (2, 4)
 
                     detail_page = await context.new_page()
