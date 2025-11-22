@@ -93,9 +93,9 @@ class NotificationSettings(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    管理应用的生命周期事件。
-    启动时：重置任务状态，加载并启动调度器。
-    关闭时：确保终止所有子进程和调度器。
+    Gerencia os eventos do ciclo de vida da aplicação.
+    Na inicialização: redefine o estado das tarefas, carrega e inicia o agendador.
+    No encerramento: garante que todos os subprocessos e o agendador sejam finalizados.
     """
     # Startup
     await _set_all_tasks_stopped_in_config()
@@ -107,21 +107,21 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     if scheduler.running:
-        print("正在关闭调度器...")
+        print("Encerrando o agendador...")
         scheduler.shutdown()
 
     global scraper_processes
     if scraper_processes:
-        print("Web服务器正在关闭，正在终止所有爬虫进程...")
+        print("O servidor web está sendo desligado, finalizando todos os processos de rastreamento...")
         stop_tasks = [stop_task_process(task_id) for task_id in list(scraper_processes.keys())]
         await asyncio.gather(*stop_tasks)
-        print("所有爬虫进程已终止。")
+        print("Todos os processos de rastreamento foram finalizados.")
 
     await _set_all_tasks_stopped_in_config()
 
 
 def load_notification_settings():
-    """Load notification settings from .env file"""
+    """Carrega as configurações de notificação a partir do arquivo .env."""
     from dotenv import dotenv_values
     config = dotenv_values(".env")
 
@@ -144,7 +144,7 @@ def load_notification_settings():
 
 
 def save_notification_settings(settings: dict):
-    """Save notification settings to .env file"""
+    """Salva as configurações de notificação no arquivo .env."""
     env_file = ".env"
     env_lines = []
 
@@ -187,7 +187,7 @@ def save_notification_settings(settings: dict):
 
 
 def load_ai_settings():
-    """Load AI model settings from .env file"""
+    """Carrega as configurações do modelo de IA a partir do arquivo .env."""
     from dotenv import dotenv_values
     config = dotenv_values(".env")
 
@@ -200,7 +200,7 @@ def load_ai_settings():
 
 
 def save_ai_settings(settings: dict):
-    """Save AI model settings to .env file"""
+    """Salva as configurações do modelo de IA no arquivo .env."""
     env_file = ".env"
     env_lines = []
 
