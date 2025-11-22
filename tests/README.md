@@ -1,68 +1,68 @@
-# 测试指南
+# Guia de Testes
 
-本项目使用 pytest 作为测试框架。以下是运行测试的指南。
+Este projeto utiliza o pytest como framework de testes. Abaixo estão as instruções para executá-los.
 
-## 安装依赖
+## Instalar dependências
 
-在运行测试之前，请确保已安装所有开发依赖项：
+Antes de rodar os testes, certifique-se de instalar todas as dependências de desenvolvimento:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 运行测试
+## Executar os testes
 
-### 运行所有测试
+### Executar todos os testes
 
 ```bash
 pytest
 ```
 
-### 运行特定测试文件
+### Executar um arquivo de teste específico
 
 ```bash
 pytest tests/test_utils.py
 ```
 
-### 运行特定测试函数
+### Executar uma função de teste específica
 
 ```bash
 pytest tests/test_utils.py::test_safe_get
 ```
 
-### 生成覆盖率报告
+### Gerar relatório de cobertura
 
 ```bash
 coverage run -m pytest
 coverage report
-coverage html  # 生成 HTML 报告
+coverage html  # gera o relatório HTML
 ```
 
-## 测试文件结构
+## Estrutura dos arquivos de teste
 
 ```
 tests/
 ├── __init__.py
-├── conftest.py          # 共享测试配置和 fixtures
-├── test_ai_handler.py   # ai_handler.py 模块的测试
-├── test_config.py       # config.py 模块的测试
-├── test_login.py        # login.py 脚本的测试
-├── test_prompt_generator.py  # prompt_generator.py 脚本的测试
-├── test_prompt_utils.py # prompt_utils.py 模块的测试
-├── test_scraper.py      # scraper.py 模块的测试
-├── test_spider_v2.py    # spider_v2.py 脚本的测试
-└── test_utils.py        # utils.py 模块的测试
+├── conftest.py          # Configuração e fixtures compartilhadas dos testes
+├── test_ai_handler.py   # Testes do módulo ai_handler.py
+├── test_config.py       # Testes do módulo config.py
+├── test_login.py        # Testes do script login.py
+├── test_prompt_generator.py  # Testes do script prompt_generator.py
+├── test_prompt_utils.py # Testes do módulo prompt_utils.py
+├── test_scraper.py      # Testes do módulo scraper.py
+├── test_spider_v2.py    # Testes do script spider_v2.py
+└── test_utils.py        # Testes do módulo utils.py
 ```
 
-## 编写新测试
+## Escrevendo novos testes
 
-1. 在 `tests/` 目录中创建新的测试文件，文件名应以 `test_` 开头
-2. 使用 `test_` 前缀命名测试函数
-3. 为异步函数使用 `@pytest.mark.asyncio` 装饰器
-4. 使用 `unittest.mock` 模块模拟外部依赖和副作用
+1. Crie um novo arquivo em `tests/` com nome iniciando em `test_`
+2. Nomeie funções de teste com o prefixo `test_`
+3. Para funções assíncronas, use o decorador `@pytest.mark.asyncio`
+4. Use o módulo `unittest.mock` para simular dependências externas e efeitos colaterais
 
-## 注意事项
+## Observações
 
-1. 一些测试可能需要复杂的模拟，特别是涉及 Playwright 的测试
-2. 某些测试可能需要实际的网络连接或外部服务
-3. 测试数据应尽可能使用模拟数据而不是真实数据
+1. Alguns testes podem exigir mocks complexos, especialmente os que envolvem Playwright
+2. Alguns testes podem precisar de conexão real com a internet ou serviços externos
+3. Sempre que possível, utilize dados simulados em vez de dados reais
