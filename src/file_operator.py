@@ -8,7 +8,7 @@ class FileOperator:
 
     async def read(self) -> str | None:
         """
-        读取
+        Lê o conteúdo de um arquivo.
         """
         try:
             async with aiofiles.open(self.filepath, 'r', encoding='utf-8') as f:
@@ -18,18 +18,18 @@ class FileOperator:
                 else:
                     return None
         except FileNotFoundError:
-            print(f"文件 {self.filepath} 不存在")
+            print(f"Arquivo {self.filepath} não existe")
             return None
         except PermissionError:
-            print(f"错误：没有权限读取文件 {self.filepath}")
+            print(f"Erro: sem permissão para ler o arquivo {self.filepath}")
             return None
         except Exception as e:
-            print(f"读取文件 {self.filepath} 时发生错误: {e}")
+            print(f"Erro ao ler o arquivo {self.filepath}: {e}")
             return None
 
     async def write(self, content: str) -> bool:
         """
-        写入
+        Escreve conteúdo em um arquivo.
         """
         try:
             Path(self.filepath).parent.mkdir(parents=True, exist_ok=True)
@@ -39,8 +39,8 @@ class FileOperator:
             return True
 
         except PermissionError:
-            print(f"错误：没有权限写入文件 {self.filepath}")
+            print(f"Erro: sem permissão para gravar o arquivo {self.filepath}")
             return False
         except Exception as e:
-            print(f"写入文件 {self.filepath} 时发生错误: {e}")
+            print(f"Erro ao gravar o arquivo {self.filepath}: {e}")
             return False

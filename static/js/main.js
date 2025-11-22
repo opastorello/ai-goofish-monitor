@@ -9,78 +9,78 @@ document.addEventListener('DOMContentLoaded', function() {
         tasks: () => `
             <section id="tasks-section" class="content-section">
                 <div class="section-header">
-                    <h2>任务管理</h2>
-                    <button id="add-task-btn" class="control-button primary-btn">➕ 创建新任务</button>
+                    <h2>Gerenciamento de tarefas</h2>
+                    <button id="add-task-btn" class="control-button primary-btn">➕ Criar nova tarefa</button>
                 </div>
                 <div id="tasks-table-container">
-                    <p>正在加载任务列表...</p>
+                    <p>Carregando lista de tarefas...</p>
                 </div>
             </section>`,
         results: () => `
             <section id="results-section" class="content-section">
                 <div class="section-header">
-                    <h2>结果查看</h2>
+                    <h2>Visualizar resultados</h2>
                 </div>
                 <div class="results-filter-bar">
-                    <select id="result-file-selector"><option>加载中...</option></select>
+                    <select id="result-file-selector"><option>Carregando...</option></select>
                     <label>
                         <input type="checkbox" id="recommended-only-checkbox">
-                        仅看AI推荐
+                        Mostrar apenas recomendações da IA
                     </label>
                     <select id="sort-by-selector">
-                        <option value="crawl_time">按爬取时间</option>
-                        <option value="publish_time">按发布时间</option>
-                        <option value="price">按价格</option>
+                        <option value="crawl_time">Por hora de coleta</option>
+                        <option value="publish_time">Por hora de publicação</option>
+                        <option value="price">Por preço</option>
                     </select>
                     <select id="sort-order-selector">
-                        <option value="desc">降序</option>
-                        <option value="asc">升序</option>
+                        <option value="desc">Descendente</option>
+                        <option value="asc">Ascendente</option>
                     </select>
-                    <button id="refresh-results-btn" class="control-button">🔄 刷新</button>
-                    <button id="delete-results-btn" class="control-button danger-btn" disabled>🗑️ 删除结果</button>
+                    <button id="refresh-results-btn" class="control-button">🔄 Atualizar</button>
+                    <button id="delete-results-btn" class="control-button danger-btn" disabled>🗑️ Excluir resultados</button>
                 </div>
                 <div id="results-grid-container">
-                    <p>请先选择一个结果文件。</p>
+                    <p>Selecione um arquivo de resultados primeiro.</p>
                 </div>
             </section>`,
         logs: () => `
             <section id="logs-section" class="content-section">
                 <div class="section-header">
-                    <h2>运行日志</h2>
+                    <h2>Logs de execução</h2>
                     <div class="log-controls">
                         <label>
                             <input type="checkbox" id="auto-refresh-logs-checkbox">
-                            自动刷新
+                            Atualizar automaticamente
                         </label>
-                        <button id="refresh-logs-btn" class="control-button">🔄 刷新</button>
-                        <button id="clear-logs-btn" class="control-button danger-btn">🗑️ 清空日志</button>
+                        <button id="refresh-logs-btn" class="control-button">🔄 Atualizar</button>
+                        <button id="clear-logs-btn" class="control-button danger-btn">🗑️ Limpar logs</button>
                     </div>
                 </div>
-                <pre id="log-content-container">正在加载日志...</pre>
+                <pre id="log-content-container">Carregando logs...</pre>
             </section>`,
         settings: () => `
             <section id="settings-section" class="content-section">
-                <h2>系统设置</h2>
+                <h2>Configurações do sistema</h2>
                 <div class="settings-card">
-                    <h3>系统状态检查</h3>
-                    <div id="system-status-container"><p>正在加载状态...</p></div>
+                    <h3>Verificação de status do sistema</h3>
+                    <div id="system-status-container"><p>Carregando status...</p></div>
                 </div>
                 <div class="settings-card">
-                    <h3>通知配置</h3>
+                    <h3>Configuração de notificações</h3>
                     <div id="notification-settings-container">
-                        <p>正在加载通知配置...</p>
+                        <p>Carregando configuração de notificações...</p>
                     </div>
                 </div>
                 <div class="settings-card">
-                    <h3>Prompt 管理</h3>
+                    <h3>Gerenciamento de Prompts</h3>
                     <div class="prompt-manager">
                         <div class="prompt-list-container">
-                            <label for="prompt-selector">选择要编辑的 Prompt:</label>
-                            <select id="prompt-selector"><option>加载中...</option></select>
+                            <label for="prompt-selector">Selecione o Prompt para editar:</label>
+                            <select id="prompt-selector"><option>Carregando...</option></select>
                         </div>
                         <div class="prompt-editor-container">
-                            <textarea id="prompt-editor" spellcheck="false" disabled placeholder="请先从上方选择一个 Prompt 文件进行编辑..."></textarea>
-                            <button id="save-prompt-btn" class="control-button primary-btn" disabled>保存更改</button>
+                            <textarea id="prompt-editor" spellcheck="false" disabled placeholder="Selecione um arquivo de Prompt acima para editar..."></textarea>
+                            <button id="save-prompt-btn" class="control-button primary-btn" disabled>Salvar alterações</button>
                         </div>
                     </div>
                 </div>
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchNotificationSettings() {
         try {
             const response = await fetch('/api/settings/notifications');
-            if (!response.ok) throw new Error('无法获取通知设置');
+            if (!response.ok) throw new Error('Não foi possível obter as configurações de notificação');
             return await response.json();
         } catch (error) {
             console.error(error);
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchAISettings() {
         try {
             const response = await fetch('/api/settings/ai');
-            if (!response.ok) throw new Error('无法获取AI设置');
+            if (!response.ok) throw new Error('Não foi possível obter as configurações de IA');
             return await response.json();
         } catch (error) {
             console.error(error);
@@ -119,12 +119,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '更新AI设置失败');
+                throw new Error(errorData.detail || 'Falha ao atualizar as configurações de IA');
             }
             return await response.json();
         } catch (error) {
-            console.error('无法更新AI设置:', error);
-            alert(`错误: ${error.message}`);
+            console.error('Não foi possível atualizar as configurações de IA:', error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -138,12 +138,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '测试AI设置失败');
+                throw new Error(errorData.detail || 'Falha ao testar as configurações de IA');
             }
             return await response.json();
         } catch (error) {
-            console.error('无法测试AI设置:', error);
-            alert(`错误: ${error.message}`);
+            console.error('Não foi possível testar as configurações de IA:', error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -157,12 +157,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '更新通知设置失败');
+                throw new Error(errorData.detail || 'Falha ao atualizar as configurações de notificações');
             }
             return await response.json();
         } catch (error) {
-            console.error('无法更新通知设置:', error);
-            alert(`错误: ${error.message}`);
+            console.error('Não foi possível atualizar as configurações de notificações:', error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchPrompts() {
         try {
             const response = await fetch('/api/prompts');
-            if (!response.ok) throw new Error('无法获取Prompt列表');
+            if (!response.ok) throw new Error('Não foi possível obter a lista de Prompts');
             return await response.json();
         } catch (error) {
             console.error(error);
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchPromptContent(filename) {
         try {
             const response = await fetch(`/api/prompts/${filename}`);
-            if (!response.ok) throw new Error(`无法获取Prompt文件 ${filename} 的内容`);
+            if (!response.ok) throw new Error(`Não foi possível obter o conteúdo do arquivo de Prompt ${filename}`);
             return await response.json();
         } catch (error) {
             console.error(error);
@@ -198,12 +198,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '更新Prompt失败');
+                throw new Error(errorData.detail || 'Falha ao atualizar o Prompt');
             }
             return await response.json();
         } catch (error) {
-            console.error(`无法更新Prompt ${filename}:`, error);
-            alert(`错误: ${error.message}`);
+            console.error(`Não foi possível atualizar o Prompt ${filename}:`, error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -219,13 +219,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '通过AI创建任务失败');
+                throw new Error(errorData.detail || 'Falha ao criar tarefa com IA');
             }
-            console.log(`AI任务创建成功!`);
+            console.log(`Tarefa criada pela IA com sucesso!`);
             return await response.json();
         } catch (error) {
-            console.error(`无法通过AI创建任务:`, error);
-            alert(`错误: ${error.message}`);
+            console.error(`Não foi possível criar a tarefa com IA:`, error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -237,12 +237,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '启动任务失败');
+                throw new Error(errorData.detail || 'Falha ao iniciar a tarefa');
             }
             return await response.json();
         } catch (error) {
-            console.error(`无法启动任务 ${taskId}:`, error);
-            alert(`错误: ${error.message}`);
+            console.error(`Não foi possível iniciar a tarefa ${taskId}:`, error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -254,12 +254,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '停止任务失败');
+                throw new Error(errorData.detail || 'Falha ao parar a tarefa');
             }
             return await response.json();
         } catch (error) {
-            console.error(`无法停止任务 ${taskId}:`, error);
-            alert(`错误: ${error.message}`);
+            console.error(`Não foi possível parar a tarefa ${taskId}:`, error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -271,13 +271,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '删除任务失败');
+                throw new Error(errorData.detail || 'Falha ao excluir a tarefa');
             }
-            console.log(`任务 ${taskId} 删除成功!`);
+            console.log(`Tarefa ${taskId} excluída com sucesso!`);
             return await response.json();
         } catch (error) {
-            console.error(`无法删除任务 ${taskId}:`, error);
-            alert(`错误: ${error.message}`);
+            console.error(`Não foi possível excluir a tarefa ${taskId}:`, error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -293,14 +293,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '更新任务失败');
+                throw new Error(errorData.detail || 'Falha ao atualizar a tarefa');
             }
-            console.log(`任务 ${taskId} 更新成功!`);
+            console.log(`Tarefa ${taskId} atualizada com sucesso!`);
             return await response.json();
         } catch (error) {
-            console.error(`无法更新任务 ${taskId}:`, error);
+            console.error(`Não foi possível atualizar a tarefa ${taskId}:`, error);
             // TODO: Use a more elegant notification system
-            alert(`错误: ${error.message}`);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return await response.json();
         } catch (error) {
-            console.error("无法获取任务列表:", error);
+            console.error("Não foi possível obter a lista de tarefas:", error);
             return null;
         }
     }
@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchResultFiles() {
         try {
             const response = await fetch('/api/results/files');
-            if (!response.ok) throw new Error('无法获取结果文件列表');
+            if (!response.ok) throw new Error('Não foi possível obter a lista de arquivos de resultados');
             return await response.json();
         } catch (error) {
             console.error(error);
@@ -336,12 +336,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || '删除结果文件失败');
+                throw new Error(errorData.detail || 'Falha ao excluir o arquivo de resultados');
             }
             return await response.json();
         } catch (error) {
-            console.error(`无法删除结果文件 ${filename}:`, error);
-            alert(`错误: ${error.message}`);
+            console.error(`Não foi possível excluir o arquivo de resultados ${filename}:`, error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 sort_order: sortOrder
             });
             const response = await fetch(`/api/results/${filename}?${params}`);
-            if (!response.ok) throw new Error(`无法获取文件 ${filename} 的内容`);
+            if (!response.ok) throw new Error(`Não foi possível obter o conteúdo do arquivo ${filename}`);
             return await response.json();
         } catch (error) {
             console.error(error);
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return await response.json();
         } catch (error) {
-            console.error("无法获取系统状态:", error);
+            console.error("Não foi possível obter o status do sistema:", error);
             return null;
         }
     }
@@ -382,12 +382,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/logs', {method: 'DELETE'});
             if (!response.ok) {
                 const err = await response.json();
-                throw new Error(err.detail || '清空日志失败');
+                throw new Error(err.detail || 'Falha ao limpar os logs');
             }
             return await response.json();
         } catch (error) {
-            console.error("无法清空日志:", error);
-            alert(`错误: ${error.message}`);
+            console.error("Não foi possível limpar os logs:", error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -397,12 +397,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/login-state', {method: 'DELETE'});
             if (!response.ok) {
                 const err = await response.json();
-                throw new Error(err.detail || '删除登录凭证失败');
+                throw new Error(err.detail || 'Falha ao excluir as credenciais de login');
             }
             return await response.json();
         } catch (error) {
-            console.error("无法删除登录凭证:", error);
-            alert(`错误: ${error.message}`);
+            console.error("Não foi possível excluir as credenciais de login:", error);
+            alert(`Erro: ${error.message}`);
             return null;
         }
     }
@@ -415,8 +415,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             return await response.json();
         } catch (error) {
-            console.error("无法获取日志:", error);
-            return {new_content: `\n加载日志失败: ${error.message}`, new_pos: fromPos};
+            console.error("Não foi possível obter os logs:", error);
+            return {new_content: `\nFalha ao carregar logs: ${error.message}`, new_pos: fromPos};
         }
     }
 
@@ -431,17 +431,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (loginState && loginState.exists) {
             content = `
                 <div class="login-status-widget">
-                    <span class="status-text status-ok">✓ 已登录</span>
+                    <span class="status-text status-ok">✓ Conectado</span>
                     <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item" id="update-login-state-btn-widget">手动更新</a>
-                        <a href="#" class="dropdown-item delete" id="delete-login-state-btn-widget">删除凭证</a>
+                        <a href="#" class="dropdown-item" id="update-login-state-btn-widget">Atualizar manualmente</a>
+                        <a href="#" class="dropdown-item delete" id="delete-login-state-btn-widget">Remover credenciais</a>
                     </div>
                 </div>
             `;
         } else {
             content = `
                 <div class="login-status-widget">
-                    <span class="status-text status-error" id="update-login-state-btn-widget">! 闲鱼未登录 (点击设置)</span>
+                    <span class="status-text status-error" id="update-login-state-btn-widget">! Goofish desconectado (clique para configurar)</span>
                 </div>
             `;
         }
@@ -449,140 +449,140 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderNotificationSettings(settings) {
-        if (!settings) return '<p>无法加载通知设置。</p>';
+        if (!settings) return '<p>Não foi possível carregar as configurações de notificação.</p>';
 
         return `
             <form id="notification-settings-form">
                 <div class="form-group">
                     <label for="ntfy-topic-url">Ntfy Topic URL</label>
-                    <input type="text" id="ntfy-topic-url" name="NTFY_TOPIC_URL" value="${settings.NTFY_TOPIC_URL || ''}" placeholder="例如: https://ntfy.sh/your_topic">
-                    <p class="form-hint">用于发送通知到 ntfy.sh 服务</p>
+                    <input type="text" id="ntfy-topic-url" name="NTFY_TOPIC_URL" value="${settings.NTFY_TOPIC_URL || ''}" placeholder="Ex.: https://ntfy.sh/your_topic">
+                    <p class="form-hint">Usado para enviar notificações para o serviço ntfy.sh</p>
                 </div>
                 
                 <div class="form-group">
                     <label for="gotify-url">Gotify URL</label>
-                    <input type="text" id="gotify-url" name="GOTIFY_URL" value="${settings.GOTIFY_URL || ''}" placeholder="例如: https://push.example.de">
-                    <p class="form-hint">Gotify 服务地址</p>
+                    <input type="text" id="gotify-url" name="GOTIFY_URL" value="${settings.GOTIFY_URL || ''}" placeholder="Ex.: https://push.example.de">
+                    <p class="form-hint">Endereço do serviço Gotify</p>
                 </div>
                 
                 <div class="form-group">
                     <label for="gotify-token">Gotify Token</label>
-                    <input type="text" id="gotify-token" name="GOTIFY_TOKEN" value="${settings.GOTIFY_TOKEN || ''}" placeholder="例如: your_gotify_token">
-                    <p class="form-hint">Gotify 应用的 Token</p>
+                    <input type="text" id="gotify-token" name="GOTIFY_TOKEN" value="${settings.GOTIFY_TOKEN || ''}" placeholder="Ex.: your_gotify_token">
+                    <p class="form-hint">Token do aplicativo Gotify</p>
                 </div>
                 
                 <div class="form-group">
                     <label for="bark-url">Bark URL</label>
-                    <input type="text" id="bark-url" name="BARK_URL" value="${settings.BARK_URL || ''}" placeholder="例如: https://api.day.app/your_key">
-                    <p class="form-hint">Bark 推送地址</p>
+                    <input type="text" id="bark-url" name="BARK_URL" value="${settings.BARK_URL || ''}" placeholder="Ex.: https://api.day.app/your_key">
+                    <p class="form-hint">URL de envio do Bark</p>
                 </div>
                 
                 <div class="form-group">
-                    <label for="wx-bot-url">企业微信机器人 URL</label>
-                    <input type="text" id="wx-bot-url" name="WX_BOT_URL" value="${settings.WX_BOT_URL || ''}" placeholder="例如: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key">
-                    <p class="form-hint">企业微信机器人的 Webhook 地址</p>
+                    <label for="wx-bot-url">URL do robô do WeCom</label>
+                    <input type="text" id="wx-bot-url" name="WX_BOT_URL" value="${settings.WX_BOT_URL || ''}" placeholder="Ex.: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key">
+                    <p class="form-hint">Webhook do robô do WeCom</p>
                 </div>
                 
                 <div class="form-group">
                     <label for="telegram-bot-token">Telegram Bot Token</label>
-                    <input type="text" id="telegram-bot-token" name="TELEGRAM_BOT_TOKEN" value="${settings.TELEGRAM_BOT_TOKEN || ''}" placeholder="例如: 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz123456789">
-                    <p class="form-hint">Telegram 机器人的 Token，从 @BotFather 获取</p>
+                    <input type="text" id="telegram-bot-token" name="TELEGRAM_BOT_TOKEN" value="${settings.TELEGRAM_BOT_TOKEN || ''}" placeholder="Ex.: 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz123456789">
+                    <p class="form-hint">Token do bot do Telegram obtido com o @BotFather</p>
                 </div>
                 
                 <div class="form-group">
                     <label for="telegram-chat-id">Telegram Chat ID</label>
-                    <input type="text" id="telegram-chat-id" name="TELEGRAM_CHAT_ID" value="${settings.TELEGRAM_CHAT_ID || ''}" placeholder="例如: 123456789">
-                    <p class="form-hint">Telegram Chat ID，从 @userinfobot 获取</p>
+                    <input type="text" id="telegram-chat-id" name="TELEGRAM_CHAT_ID" value="${settings.TELEGRAM_CHAT_ID || ''}" placeholder="Ex.: 123456789">
+                    <p class="form-hint">ID de chat do Telegram obtido com @userinfobot</p>
                 </div>
                 
                 <div class="form-group">
-                    <label for="webhook-url">通用 Webhook URL</label>
-                    <input type="text" id="webhook-url" name="WEBHOOK_URL" value="${settings.WEBHOOK_URL || ''}" placeholder="例如: https://your-webhook-url.com/endpoint">
-                    <p class="form-hint">通用 Webhook 的 URL 地址</p>
+                    <label for="webhook-url">URL de Webhook genérico</label>
+                    <input type="text" id="webhook-url" name="WEBHOOK_URL" value="${settings.WEBHOOK_URL || ''}" placeholder="Ex.: https://your-webhook-url.com/endpoint">
+                    <p class="form-hint">Endereço do Webhook genérico</p>
                 </div>
                 
                 <div class="form-group">
-                    <label for="webhook-method">Webhook 方法</label>
+                    <label for="webhook-method">Método do Webhook</label>
                     <select id="webhook-method" name="WEBHOOK_METHOD">
                         <option value="POST" ${settings.WEBHOOK_METHOD === 'POST' ? 'selected' : ''}>POST</option>
                         <option value="GET" ${settings.WEBHOOK_METHOD === 'GET' ? 'selected' : ''}>GET</option>
                     </select>
-                    <p class="form-hint">Webhook 请求方法</p>
+                    <p class="form-hint">Método da requisição do Webhook</p>
                 </div>
                 
                 <div class="form-group">
-                    <label for="webhook-headers">Webhook 请求头 (JSON)</label>
-                    <textarea id="webhook-headers" name="WEBHOOK_HEADERS" rows="3" placeholder='例如: {"Authorization": "Bearer token"}'>${settings.WEBHOOK_HEADERS || ''}</textarea>
-                    <p class="form-hint">必须是有效的 JSON 字符串</p>
+                    <label for="webhook-headers">Cabeçalhos do Webhook (JSON)</label>
+                    <textarea id="webhook-headers" name="WEBHOOK_HEADERS" rows="3" placeholder='Ex.: {"Authorization": "Bearer token"}'>${settings.WEBHOOK_HEADERS || ''}</textarea>
+                    <p class="form-hint">Deve ser uma string JSON válida</p>
                 </div>
                 
                 <div class="form-group">
-                    <label for="webhook-content-type">Webhook 内容类型</label>
+                    <label for="webhook-content-type">Tipo de conteúdo do Webhook</label>
                     <select id="webhook-content-type" name="WEBHOOK_CONTENT_TYPE">
                         <option value="JSON" ${settings.WEBHOOK_CONTENT_TYPE === 'JSON' ? 'selected' : ''}>JSON</option>
                         <option value="FORM" ${settings.WEBHOOK_CONTENT_TYPE === 'FORM' ? 'selected' : ''}>FORM</option>
                     </select>
-                    <p class="form-hint">POST 请求的内容类型</p>
+                    <p class="form-hint">Tipo de conteúdo para requisições POST</p>
                 </div>
                 
                 <div class="form-group">
-                    <label for="webhook-query-parameters">Webhook 查询参数 (JSON)</label>
-                    <textarea id="webhook-query-parameters" name="WEBHOOK_QUERY_PARAMETERS" rows="3" placeholder='例如: {"param1": "value1"}'>${settings.WEBHOOK_QUERY_PARAMETERS || ''}</textarea>
-                    <p class="form-hint">GET 请求的查询参数，支持 \${title} 和 \${content} 占位符</p>
+                    <label for="webhook-query-parameters">Parâmetros de consulta do Webhook (JSON)</label>
+                    <textarea id="webhook-query-parameters" name="WEBHOOK_QUERY_PARAMETERS" rows="3" placeholder='Ex.: {"param1": "value1"}'>${settings.WEBHOOK_QUERY_PARAMETERS || ''}</textarea>
+                    <p class="form-hint">Parâmetros de consulta para GET; suporta os placeholders \${title} e \${content}</p>
                 </div>
                 
                 <div class="form-group">
-                    <label for="webhook-body">Webhook 请求体 (JSON)</label>
-                    <textarea id="webhook-body" name="WEBHOOK_BODY" rows="3" placeholder='例如: {"message": "\${content}"}'>${settings.WEBHOOK_BODY || ''}</textarea>
-                    <p class="form-hint">POST 请求的请求体，支持 \${title} 和 \${content} 占位符</p>
+                    <label for="webhook-body">Corpo do Webhook (JSON)</label>
+                    <textarea id="webhook-body" name="WEBHOOK_BODY" rows="3" placeholder='Ex.: {"message": "\${content}"}'>${settings.WEBHOOK_BODY || ''}</textarea>
+                    <p class="form-hint">Corpo da requisição POST; suporta os placeholders \${title} e \${content}</p>
                 </div>
                 
                 <div class="form-group">
                     <label>
                         <input type="checkbox" id="pcurl-to-mobile" name="PCURL_TO_MOBILE" ${settings.PCURL_TO_MOBILE ? 'checked' : ''}>
-                        将电脑版链接转换为手机版
+                        Converter links da versão desktop para a versão mobile
                     </label>
-                    <p class="form-hint">在通知中将电脑版商品链接转换为手机版</p>
+                    <p class="form-hint">Converte links de produtos da versão desktop para a versão mobile nas notificações</p>
                 </div>
                 
-                <button type="submit" class="control-button primary-btn">保存通知设置</button>
+                <button type="submit" class="control-button primary-btn">Salvar configurações de notificações</button>
             </form>
         `;
     }
 
     function renderAISettings(settings) {
-        if (!settings) return '<p>无法加载AI设置。</p>';
+        if (!settings) return '<p>Não foi possível carregar as configurações de IA.</p>';
 
         return `
             <form id="ai-settings-form">
                 <div class="form-group">
                     <label for="openai-api-key">API Key *</label>
-                    <input type="password" id="openai-api-key" name="OPENAI_API_KEY" value="${settings.OPENAI_API_KEY || ''}" placeholder="例如: sk-..." required>
-                    <p class="form-hint">你的AI模型服务商提供的API Key</p>
+                    <input type="password" id="openai-api-key" name="OPENAI_API_KEY" value="${settings.OPENAI_API_KEY || ''}" placeholder="Ex.: sk-..." required>
+                    <p class="form-hint">API Key fornecida pelo serviço de IA</p>
                 </div>
                 
                 <div class="form-group">
                     <label for="openai-base-url">API Base URL *</label>
-                    <input type="text" id="openai-base-url" name="OPENAI_BASE_URL" value="${settings.OPENAI_BASE_URL || ''}" placeholder="例如: https://api.openai.com/v1/" required>
-                    <p class="form-hint">AI模型的API接口地址，必须兼容OpenAI格式</p>
+                    <input type="text" id="openai-base-url" name="OPENAI_BASE_URL" value="${settings.OPENAI_BASE_URL || ''}" placeholder="Ex.: https://api.openai.com/v1/" required>
+                    <p class="form-hint">Endpoint da API do modelo de IA; deve ser compatível com o formato da OpenAI</p>
                 </div>
                 
                 <div class="form-group">
-                    <label for="openai-model-name">模型名称 *</label>
-                    <input type="text" id="openai-model-name" name="OPENAI_MODEL_NAME" value="${settings.OPENAI_MODEL_NAME || ''}" placeholder="例如: gemini-2.5-pro" required>
-                    <p class="form-hint">你要使用的具体模型名称，必须支持图片分析</p>
+                    <label for="openai-model-name">Nome do modelo *</label>
+                    <input type="text" id="openai-model-name" name="OPENAI_MODEL_NAME" value="${settings.OPENAI_MODEL_NAME || ''}" placeholder="Ex.: gemini-2.5-pro" required>
+                    <p class="form-hint">Nome do modelo a ser usado; deve suportar análise de imagens</p>
                 </div>
                 
                 <div class="form-group">
-                    <label for="proxy-url">代理地址 (可选)</label>
-                    <input type="text" id="proxy-url" name="PROXY_URL" value="${settings.PROXY_URL || ''}" placeholder="例如: http://127.0.0.1:7890">
-                    <p class="form-hint">HTTP/S代理地址，支持 http 和 socks5 格式</p>
+                    <label for="proxy-url">Endereço de proxy (opcional)</label>
+                    <input type="text" id="proxy-url" name="PROXY_URL" value="${settings.PROXY_URL || ''}" placeholder="Ex.: http://127.0.0.1:7890">
+                    <p class="form-hint">Endereço de proxy HTTP/S; suporta http e socks5</p>
                 </div>
                 
                 <div class="form-group">
-                    <button type="button" id="test-ai-settings-btn" class="control-button">测试连接（浏览器）</button>
-                    <button type="button" id="test-ai-settings-backend-btn" class="control-button">测试连接（后端容器）</button>
-                    <button type="submit" class="control-button primary-btn">保存AI设置</button>
+                    <button type="button" id="test-ai-settings-btn" class="control-button">Testar conexão (navegador)</button>
+                    <button type="button" id="test-ai-settings-backend-btn" class="control-button">Testar conexão (contêiner backend)</button>
+                    <button type="submit" class="control-button primary-btn">Salvar configurações de IA</button>
                 </div>
             </form>
         `;
@@ -596,18 +596,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderSystemStatus(status) {
-        if (!status) return '<p>无法加载系统状态。</p>';
+        if (!status) return '<p>Não foi possível carregar o status do sistema.</p>';
 
         const renderStatusTag = (isOk) => isOk
-            ? `<span class="tag status-ok">正常</span>`
-            : `<span class="tag status-error">异常</span>`;
+            ? `<span class="tag status-ok">OK</span>`
+            : `<span class="tag status-error">Problema</span>`;
 
         const env = status.env_file || {};
 
         return `
             <ul class="status-list">
                 <li class="status-item">
-                    <span class="label">环境变量文件 (.env)</span>
+                    <span class="label">Arquivo de variáveis de ambiente (.env)</span>
                     <span class="value">${renderStatusTag(env.exists)}</span>
                 </li>
                 <li class="status-item">
@@ -632,7 +632,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderResultsGrid(data) {
         if (!data || !data.items || data.items.length === 0) {
-            return '<p>没有找到符合条件的商品记录。</p>';
+            return '<p>Nenhum item correspondente encontrado.</p>';
         }
 
         const cards = data.items.map(item => {
@@ -642,11 +642,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const isRecommended = ai.is_recommended === true;
             const recommendationClass = isRecommended ? 'recommended' : 'not-recommended';
-            const recommendationText = isRecommended ? '推荐' : (ai.is_recommended === false ? '不推荐' : '待定');
+            const recommendationText = isRecommended ? 'Recomendado' : (ai.is_recommended === false ? 'Não recomendado' : 'Indefinido');
 
             const imageUrl = (info.商品图片列表 && info.商品图片列表[0]) ? info.商品图片列表[0] : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-            const crawlTime = item.爬取时间 ? new Date(item.爬取时间).toLocaleString('sv-SE').slice(0, 16) : '未知';
-            const publishTime = info.发布时间 || '未知';
+            const crawlTime = item.爬取时间 ? new Date(item.爬取时间).toLocaleString('sv-SE').slice(0, 16) : 'Desconhecido';
+            const publishTime = info.发布时间 || 'Desconhecido';
 
             // Escape HTML to prevent XSS
             const escapeHtml = (unsafe) => {
@@ -662,24 +662,24 @@ document.addEventListener('DOMContentLoaded', function() {
             return `
             <div class="result-card" data-item='${escapeHtml(JSON.stringify(item))}'>
                 <div class="card-image">
-                    <a href="${escapeHtml(info.商品链接) || '#'}" target="_blank"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(info.商品标题) || '商品图片'}" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJhzwvdGV4dD48L3N2Zz4=';"></a>
+                    <a href="${escapeHtml(info.商品链接) || '#'}" target="_blank"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(info.商品标题) || 'Imagem do produto'}" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJhzwvdGV4dD48L3N2Zz4=';"></a>
                 </div>
                 <div class="card-content">
-                    <h3 class="card-title"><a href="${escapeHtml(info.商品链接) || '#'}" target="_blank" title="${escapeHtml(info.商品标题) || ''}">${escapeHtml(info.商品标题) || '无标题'}</a></h3>
-                    <p class="card-price">${escapeHtml(info.当前售价) || '价格未知'}</p>
+                    <h3 class="card-title"><a href="${escapeHtml(info.商品链接) || '#'}" target="_blank" title="${escapeHtml(info.商品标题) || ''}">${escapeHtml(info.商品标题) || 'Sem título'}</a></h3>
+                    <p class="card-price">${escapeHtml(info.当前售价) || 'Preço desconhecido'}</p>
                     <div class="card-ai-summary ${recommendationClass}">
-                        <strong>AI建议: ${escapeHtml(recommendationText)}</strong>
-                        <p title="${escapeHtml(ai.reason) || ''}">原因: ${escapeHtml(ai.reason) || '无分析'}</p>
+                        <strong>Sugestão da IA: ${escapeHtml(recommendationText)}</strong>
+                        <p title="${escapeHtml(ai.reason) || ''}">Motivo: ${escapeHtml(ai.reason) || 'Sem análise'}</p>
                     </div>
                     <div class="card-footer">
                         <div>
-                            <span class="seller-info" title="${escapeHtml(info.卖家昵称) || escapeHtml(seller.卖家昵称) || '未知'}">卖家: ${escapeHtml(info.卖家昵称) || escapeHtml(seller.卖家昵称) || '未知'}</span>
+                            <span class="seller-info" title="${escapeHtml(info.卖家昵称) || escapeHtml(seller.卖家昵称) || 'Desconhecido'}">Vendedor: ${escapeHtml(info.卖家昵称) || escapeHtml(seller.卖家昵称) || 'Desconhecido'}</span>
                             <div class="time-info">
-                                <p>发布于: ${escapeHtml(publishTime)}</p>
-                                <p>抓取于: ${escapeHtml(crawlTime)}</p>
+                                <p>Publicado em: ${escapeHtml(publishTime)}</p>
+                                <p>Coletado em: ${escapeHtml(crawlTime)}</p>
                             </div>
                         </div>
-                        <a href="${escapeHtml(info.商品链接) || '#'}" target="_blank" class="action-btn">查看详情</a>
+                        <a href="${escapeHtml(info.商品链接) || '#'}" target="_blank" class="action-btn">Ver detalhes</a>
                     </div>
                 </div>
             </div>
@@ -691,7 +691,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderTasksTable(tasks) {
         if (!tasks || tasks.length === 0) {
-            return '<p>没有找到任何任务。请点击右上角“创建新任务”来添加一个。</p>';
+            return '<p>Nenhuma tarefa encontrada. Clique em "Criar nova tarefa" no canto superior direito para adicionar uma.</p>';
         }
 
         const refreshBtn = '<svg class="icon" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"  width="16" height="16"><path d="M914.17946 324.34283C854.308387 324.325508 750.895846 324.317788 750.895846 324.317788 732.045471 324.317788 716.764213 339.599801 716.764213 358.451121 716.764213 377.30244 732.045471 392.584453 750.895846 392.584453L955.787864 392.584453C993.448095 392.584453 1024 362.040424 1024 324.368908L1024 119.466667C1024 100.615347 1008.718742 85.333333 989.868367 85.333333 971.017993 85.333333 955.736735 100.615347 955.736735 119.466667L955.736735 256.497996C933.314348 217.628194 905.827487 181.795372 873.995034 149.961328 778.623011 54.584531 649.577119 0 511.974435 0 229.218763 0 0 229.230209 0 512 0 794.769791 229.218763 1024 511.974435 1024 794.730125 1024 1023.948888 794.769791 1023.948888 512 1023.948888 493.148681 1008.66763 477.866667 989.817256 477.866667 970.966881 477.866667 955.685623 493.148681 955.685623 512 955.685623 757.067153 757.029358 955.733333 511.974435 955.733333 266.91953 955.733333 68.263265 757.067153 68.263265 512 68.263265 266.932847 266.91953 68.266667 511.974435 68.266667 631.286484 68.266667 743.028524 115.531923 825.725634 198.233152 862.329644 234.839003 892.298522 277.528256 914.17946 324.34283L914.17946 324.34283Z" fill="#389BFF"></path></svg>'
@@ -699,28 +699,28 @@ document.addEventListener('DOMContentLoaded', function() {
         const tableHeader = `
             <thead>
                 <tr>
-                    <th>启用</th>
-                    <th>任务名称</th>
-                    <th>运行状态</th>
-                    <th>关键词</th>
-                    <th>价格范围</th>
-                    <th>筛选条件</th>
-                    <th>最大页数</th>
-                    <th>AI 标准</th>
-                    <th>定时规则</th>
-                    <th>操作</th>
+                    <th>Ativar</th>
+                    <th>Nome da tarefa</th>
+                    <th>Status de execução</th>
+                    <th>Palavra-chave</th>
+                    <th>Faixa de preço</th>
+                    <th>Filtros</th>
+                    <th>Máx. páginas</th>
+                    <th>Critérios da IA</th>
+                    <th>Regra de agendamento</th>
+                    <th>Ações</th>
                 </tr>
             </thead>`;
 
         const tableBody = tasks.map(task => {
             const isRunning = task.is_running === true;
             const statusBadge = isRunning
-                ? `<span class="status-badge status-running">运行中</span>`
-                : `<span class="status-badge status-stopped">已停止</span>`;
+                ? `<span class="status-badge status-running">Em execução</span>`
+                : `<span class="status-badge status-stopped">Parado</span>`;
 
             const actionButton = isRunning
-                ? `<button class="action-btn stop-task-btn" data-task-id="${task.id}">停止</button>`
-                : `<button class="action-btn run-task-btn" data-task-id="${task.id}" ${!task.enabled ? 'disabled title="任务已禁用"' : ''}>运行</button>`;
+                ? `<button class="action-btn stop-task-btn" data-task-id="${task.id}">Parar</button>`
+                : `<button class="action-btn run-task-btn" data-task-id="${task.id}" ${!task.enabled ? 'disabled title="Tarefa desativada"' : ''}>Executar</button>`;
 
             return `
             <tr data-task-id="${task.id}" data-task='${JSON.stringify(task)}'>
@@ -733,15 +733,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${task.task_name}</td>
                 <td>${statusBadge}</td>
                 <td><span class="tag">${task.keyword}</span></td>
-                <td>${task.min_price || '不限'} - ${task.max_price || '不限'}</td>
-                <td>${task.personal_only ? '<span class="tag personal">个人闲置</span>' : ''}</td>
+                <td>${task.min_price || 'Sem limite'} - ${task.max_price || 'Sem limite'}</td>
+                <td>${task.personal_only ? '<span class="tag personal">Vendedor particular</span>' : ''}</td>
                 <td>${task.max_pages || 3}</td>
-                <td><div class="criteria"><button class="refresh-criteria" title="重新生成AI标准" data-task-id="${task.id}">${refreshBtn}</button>${(task.ai_prompt_criteria_file || 'N/A').replace('prompts/', '')}</div></td>
-                <td>${task.cron || '未设置'}</td>
+                <td><div class="criteria"><button class="refresh-criteria" title="Gerar critérios da IA novamente" data-task-id="${task.id}">${refreshBtn}</button>${(task.ai_prompt_criteria_file || 'N/A').replace('prompts/', '')}</div></td>
+                <td>${task.cron || 'Não definido'}</td>
                 <td>
                     ${actionButton}
-                    <button class="action-btn edit-btn">编辑</button>
-                    <button class="action-btn delete-btn">删除</button>
+                    <button class="action-btn edit-btn">Editar</button>
+                    <button class="action-btn delete-btn">Excluir</button>
                 </td>
             </tr>`
         }).join('');
@@ -798,7 +798,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
         } else {
-            mainContent.innerHTML = '<section class="content-section active"><h2>页面未找到</h2></section>';
+            mainContent.innerHTML = '<section class="content-section active"><h2>Página não encontrada</h2></section>';
         }
     }
 
@@ -815,17 +815,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (isFullRefresh) {
                 currentLogSize = 0;
-                logContainer.textContent = '正在加载...';
+                logContainer.textContent = 'Carregando...';
             }
 
             const logData = await fetchLogs(currentLogSize);
 
             if (isFullRefresh) {
                 // If the log is empty, show a message instead of a blank screen.
-                logContainer.textContent = logData.new_content || '日志为空，等待内容...';
+                logContainer.textContent = logData.new_content || 'Logs vazios, aguardando conteúdo...';
             } else if (logData.new_content) {
                 // If it was showing the empty message, replace it.
-                if (logContainer.textContent === '日志为空，等待内容...') {
+                if (logContainer.textContent === 'Logs vazios, aguardando conteúdo...') {
                     logContainer.textContent = logData.new_content;
                 } else {
                     logContainer.textContent += logData.new_content;
@@ -842,11 +842,11 @@ document.addEventListener('DOMContentLoaded', function() {
         refreshBtn.addEventListener('click', () => updateLogs(true));
 
         clearBtn.addEventListener('click', async () => {
-            if (confirm('你确定要清空所有运行日志吗？此操作不可恢复。')) {
+            if (confirm('Tem certeza de que deseja limpar todos os logs de execução? Esta ação não pode ser desfeita.')) {
                 const result = await clearLogs();
                 if (result) {
                     await updateLogs(true);
-                    alert('日志已清空。');
+                    alert('Logs limpos.');
                 }
             }
         });
@@ -882,13 +882,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const sortOrder = sortOrderSelector.value;
 
         if (!selectedFile) {
-            container.innerHTML = '<p>请先选择一个结果文件。</p>';
+            container.innerHTML = '<p>Selecione um arquivo de resultados primeiro.</p>';
             return;
         }
 
         localStorage.setItem('lastSelectedResultFile', selectedFile);
 
-        container.innerHTML = '<p>正在加载结果...</p>';
+        container.innerHTML = '<p>Carregando resultados...</p>';
         const data = await fetchResultContent(selectedFile, recommendedOnly, sortBy, sortOrder);
         container.innerHTML = renderResultsGrid(data);
     }
@@ -928,18 +928,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 deleteBtn.disabled = !selector.value;
             };
             selector.addEventListener('change', updateDeleteButtonState);
-            // 初始化时也更新一次删除按钮状态
+            // Atualize o estado do botão de exclusão na inicialização
             updateDeleteButtonState();
 
             // Delete button functionality
             deleteBtn.addEventListener('click', async () => {
                 const selectedFile = selector.value;
                 if (!selectedFile) {
-                    alert('请先选择一个结果文件。');
+                    alert('Selecione um arquivo de resultados primeiro.');
                     return;
                 }
 
-                if (confirm(`你确定要删除结果文件 "${selectedFile}" 吗？此操作不可恢复。`)) {
+                if (confirm(`Tem certeza de que deseja excluir o arquivo de resultados "${selectedFile}"? Esta ação não pode ser desfeita.`)) {
                     const result = await deleteResultFile(selectedFile);
                     if (result) {
                         alert(result.message);
@@ -952,8 +952,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Initial load
             await fetchAndRenderResults();
         } else {
-            selector.innerHTML = '<option value="">没有可用的结果文件</option>';
-            document.getElementById('results-grid-container').innerHTML = '<p>没有找到任何结果文件。请先运行监控任务。</p>';
+            selector.innerHTML = '<option value="">Nenhum arquivo de resultado disponível</option>';
+            document.getElementById('results-grid-container').innerHTML = '<p>Nenhum arquivo de resultados encontrado. Execute uma tarefa de monitoramento primeiro.</p>';
         }
     }
 
@@ -969,16 +969,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (notificationSettings !== null) {
             notificationContainer.innerHTML = renderNotificationSettings(notificationSettings);
         } else {
-            notificationContainer.innerHTML = '<p>加载通知配置失败。请检查服务器是否正常运行。</p>';
+            notificationContainer.innerHTML = '<p>Falha ao carregar a configuração de notificações. Verifique se o servidor está em execução.</p>';
         }
 
         // 3. Render AI Settings
         const aiContainer = document.createElement('div');
         aiContainer.className = 'settings-card';
         aiContainer.innerHTML = `
-            <h3>AI模型配置</h3>
+            <h3>Configuração do modelo de IA</h3>
             <div id="ai-settings-container">
-                <p>正在加载AI配置...</p>
+                <p>Carregando configuração de IA...</p>
             </div>
         `;
 
@@ -991,7 +991,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (aiSettings !== null) {
             aiSettingsContainer.innerHTML = renderAISettings(aiSettings);
         } else {
-            aiSettingsContainer.innerHTML = '<p>加载AI配置失败。请检查服务器是否正常运行。</p>';
+            aiSettingsContainer.innerHTML = '<p>Falha ao carregar configuração de IA. Verifique se o servidor está em execução.</p>';
         }
 
         // 4. Setup Prompt Editor
@@ -1001,18 +1001,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const prompts = await fetchPrompts();
         if (prompts && prompts.length > 0) {
-            promptSelector.innerHTML = '<option value="">-- 请选择 --</option>' + prompts.map(p => `<option value="${p}">${p}</option>`).join('');
+            promptSelector.innerHTML = '<option value="">-- Selecione --</option>' + prompts.map(p => `<option value="${p}">${p}</option>`).join('');
         } else if (prompts && prompts.length === 0) {
-            promptSelector.innerHTML = '<option value="">没有找到Prompt文件</option>';
+            promptSelector.innerHTML = '<option value="">Nenhum arquivo de Prompt encontrado</option>';
         } else {
             // prompts is null or undefined, which means fetch failed
-            promptSelector.innerHTML = '<option value="">加载Prompt文件列表失败</option>';
+            promptSelector.innerHTML = '<option value="">Falha ao carregar a lista de arquivos de Prompt</option>';
         }
 
         promptSelector.addEventListener('change', async () => {
             const selectedFile = promptSelector.value;
             if (selectedFile) {
-                promptEditor.value = "正在加载...";
+                promptEditor.value = "Carregando...";
                 promptEditor.disabled = true;
                 savePromptBtn.disabled = true;
                 const data = await fetchPromptContent(selectedFile);
@@ -1021,10 +1021,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     promptEditor.disabled = false;
                     savePromptBtn.disabled = false;
                 } else {
-                    promptEditor.value = `加载文件 ${selectedFile} 失败。`;
+                    promptEditor.value = `Falha ao carregar o arquivo ${selectedFile}.`;
                 }
             } else {
-                promptEditor.value = "请先从上方选择一个 Prompt 文件进行编辑...";
+                promptEditor.value = "Selecione um arquivo de Prompt acima para editar...";
                 promptEditor.disabled = true;
                 savePromptBtn.disabled = true;
             }
@@ -1034,21 +1034,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedFile = promptSelector.value;
             const content = promptEditor.value;
             if (!selectedFile) {
-                alert("请先选择一个要保存的Prompt文件。");
+                alert("Selecione um arquivo de Prompt para salvar.");
                 return;
             }
 
             savePromptBtn.disabled = true;
-            savePromptBtn.textContent = '保存中...';
+            savePromptBtn.textContent = 'Salvando...';
 
             const result = await updatePrompt(selectedFile, content);
             if (result) {
-                alert(result.message || "保存成功！");
+                alert(result.message || "Salvo com sucesso!");
             }
             // No need to show alert on failure, as updatePrompt already does.
 
             savePromptBtn.disabled = false;
-            savePromptBtn.textContent = '保存更改';
+            savePromptBtn.textContent = 'Salvar alterações';
         });
 
         // 5. Add event listener for notification settings form
@@ -1080,11 +1080,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const saveBtn = notificationForm.querySelector('button[type="submit"]');
                 const originalText = saveBtn.textContent;
                 saveBtn.disabled = true;
-                saveBtn.textContent = '保存中...';
+                saveBtn.textContent = 'Salvando...';
 
                 const result = await updateNotificationSettings(settings);
                 if (result) {
-                    alert(result.message || "通知设置已保存！");
+                    alert(result.message || "Configurações de notificações salvas!");
                 }
 
                 saveBtn.disabled = false;
@@ -1111,11 +1111,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const saveBtn = aiForm.querySelector('button[type="submit"]');
                 const originalText = saveBtn.textContent;
                 saveBtn.disabled = true;
-                saveBtn.textContent = '保存中...';
+                saveBtn.textContent = 'Salvando...';
 
                 const result = await updateAISettings(settings);
                 if (result) {
-                    alert(result.message || "AI设置已保存！");
+                    alert(result.message || "Configurações de IA salvas!");
                 }
 
                 saveBtn.disabled = false;
@@ -1138,14 +1138,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Test settings
                     const originalText = testBtn.textContent;
                     testBtn.disabled = true;
-                    testBtn.textContent = '测试中...';
+                    testBtn.textContent = 'Testando...';
 
                     const result = await testAISettings(settings);
                     if (result) {
                         if (result.success) {
-                            alert(result.message || "AI模型连接测试成功！");
+                            alert(result.message || "Teste de conexão do modelo de IA bem-sucedido!");
                         } else {
-                            alert("浏览器测试失败: " + result.message);
+                            alert("Teste no navegador falhou: " + result.message);
                         }
                     }
 
@@ -1161,7 +1161,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Test backend settings without form data (uses env config)
                     const originalText = testBackendBtn.textContent;
                     testBackendBtn.disabled = true;
-                    testBackendBtn.textContent = '测试中...';
+                    testBackendBtn.textContent = 'Testando...';
 
                     try {
                         const response = await fetch('/api/settings/ai/test/backend', {
@@ -1172,18 +1172,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
 
                         if (!response.ok) {
-                            throw new Error('后端测试请求失败');
+                            throw new Error('Falha ao solicitar teste no backend');
                         }
 
                         const result = await response.json();
-                        if (result.success) {
-                            alert(result.message || "后端AI模型连接测试成功！");
-                        } else {
-                            alert("后端容器测试失败: " + result.message);
-                        }
-                    } catch (error) {
-                        alert("后端容器测试错误: " + error.message);
+                    if (result.success) {
+                        alert(result.message || "Teste do modelo de IA no backend concluído com sucesso!");
+                    } else {
+                        alert("Teste do contêiner backend falhou: " + result.message);
                     }
+                } catch (error) {
+                    alert("Erro no teste do contêiner backend: " + error.message);
+                }
 
                     testBackendBtn.disabled = false;
                     testBackendBtn.textContent = originalText;
@@ -1229,7 +1229,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (button.matches('.run-task-btn')) {
             const taskId = button.dataset.taskId;
             button.disabled = true;
-            button.textContent = '启动中...';
+            button.textContent = 'Iniciando...';
             await startSingleTask(taskId);
             // The auto-refresh will update the UI. For immediate feedback:
             const tasks = await fetchTasks();
@@ -1237,7 +1237,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (button.matches('.stop-task-btn')) {
             const taskId = button.dataset.taskId;
             button.disabled = true;
-            button.textContent = '停止中...';
+            button.textContent = 'Parando...';
             await stopSingleTask(taskId);
             // The auto-refresh will update the UI. For immediate feedback:
             const tasks = await fetchTasks();
@@ -1246,8 +1246,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const taskData = JSON.parse(row.dataset.task);
             const isRunning = taskData.is_running === true;
             const statusBadge = isRunning
-                ? `<span class="status-badge status-running">运行中</span>`
-                : `<span class="status-badge status-stopped">已停止</span>`;
+                ? `<span class="status-badge status-running">Em execução</span>`
+                : `<span class="status-badge status-stopped">Parado</span>`;
 
             row.classList.add('editing');
             row.innerHTML = `
@@ -1261,26 +1261,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${statusBadge}</td>
                 <td><input type="text" value="${taskData.keyword}" data-field="keyword"></td>
                 <td>
-                    <input type="text" value="${taskData.min_price || ''}" placeholder="不限" data-field="min_price" style="width: 60px;"> -
-                    <input type="text" value="${taskData.max_price || ''}" placeholder="不限" data-field="max_price" style="width: 60px;">
+                    <input type="text" value="${taskData.min_price || ''}" placeholder="Sem limite" data-field="min_price" style="width: 60px;"> -
+                    <input type="text" value="${taskData.max_price || ''}" placeholder="Sem limite" data-field="max_price" style="width: 60px;">
                 </td>
                 <td>
                     <label>
-                        <input type="checkbox" ${taskData.personal_only ? 'checked' : ''} data-field="personal_only"> 个人闲置
+                        <input type="checkbox" ${taskData.personal_only ? 'checked' : ''} data-field="personal_only"> Vendedor particular
                     </label>
                 </td>
                 <td><input type="number" value="${taskData.max_pages || 3}" data-field="max_pages" style="width: 60px;" min="1"></td>
                 <td>${(taskData.ai_prompt_criteria_file || 'N/A').replace('prompts/', '')}</td>
                 <td><input type="text" value="${taskData.cron || ''}" placeholder="* * * * *" data-field="cron"></td>
                 <td>
-                    <button class="action-btn save-btn">保存</button>
-                    <button class="action-btn cancel-btn">取消</button>
+                    <button class="action-btn save-btn">Salvar</button>
+                    <button class="action-btn cancel-btn">Cancelar</button>
                 </td>
             `;
 
         } else if (button.matches('.delete-btn')) {
             const taskName = row.querySelector('td:nth-child(2)').textContent;
-            if (confirm(`你确定要删除任务 "${taskName}" 吗?`)) {
+            if (confirm(`Tem certeza de que deseja excluir a tarefa "${taskName}"?`)) {
                 const result = await deleteTask(taskId);
                 if (result) {
                     row.remove();
@@ -1295,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const taskNameInput = row.querySelector('input[data-field="task_name"]');
             const keywordInput = row.querySelector('input[data-field="keyword"]');
             if (!taskNameInput.value.trim() || !keywordInput.value.trim()) {
-                alert('任务名称和关键词不能为空。');
+                alert('Nome da tarefa e palavra-chave são obrigatórios.');
                 return;
             }
 
@@ -1308,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     const value = input.value.trim();
                     if (field === 'max_pages') {
-                        // 确保 max_pages 作为数字发送，如果为空则默认为3
+                        // Garantir que max_pages seja enviado como número; se vazio, padrão é 3
                         updatedData[field] = value ? parseInt(value, 10) : 3;
                     } else {
                         updatedData[field] = value === '' ? null : value;
@@ -1501,22 +1501,22 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
             const codeToCopy = document.getElementById('login-script-code').textContent.trim();
 
-            // 在安全上下文中使用现代剪贴板API，否则使用备用方法
+            // Use a API moderna de área de transferência em contexto seguro; caso contrário, use o método alternativo
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(codeToCopy).then(() => {
-                    copyCodeBtn.textContent = '已复制!';
+                    copyCodeBtn.textContent = 'Copiado!';
                     setTimeout(() => {
-                        copyCodeBtn.textContent = '复制脚本';
+                        copyCodeBtn.textContent = 'Copiar script';
                     }, 2000);
                 }).catch(err => {
-                    console.error('无法使用剪贴板API复制文本: ', err);
-                    alert('复制失败，请手动复制。');
+                    console.error('Não foi possível usar a API da área de transferência: ', err);
+                    alert('Falha ao copiar, copie manualmente.');
                 });
             } else {
-                // 针对非安全上下文 (如HTTP) 或旧版浏览器的备用方案
+                // Alternativa para contextos inseguros (HTTP) ou navegadores antigos
                 const textArea = document.createElement("textarea");
                 textArea.value = codeToCopy;
-                // 使文本区域不可见
+                // Tornar a área de texto invisível
                 textArea.style.position = "fixed";
                 textArea.style.top = "-9999px";
                 textArea.style.left = "-9999px";
@@ -1525,13 +1525,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 textArea.select();
                 try {
                     document.execCommand('copy');
-                    copyCodeBtn.textContent = '已复制!';
+                    copyCodeBtn.textContent = 'Copiado!';
                     setTimeout(() => {
-                        copyCodeBtn.textContent = '复制脚本';
+                        copyCodeBtn.textContent = 'Copiar script';
                     }, 2000);
                 } catch (err) {
-                    console.error('备用方案: 无法复制文本', err);
-                    alert('复制失败，请手动复制。');
+                    console.error('Alternativa: não foi possível copiar o texto', err);
+                    alert('Falha ao copiar, copie manualmente.');
                 }
                 document.body.removeChild(textArea);
             }
@@ -1542,7 +1542,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => modal.classList.add('visible'), 10);
         } else if (widgetDeleteBtn) {
             event.preventDefault();
-            if (confirm('你确定要删除登录凭证 (xianyu_state.json) 吗？删除后需要重新设置才能运行任务。')) {
+            if (confirm('Tem certeza de que deseja excluir as credenciais de login (xianyu_state.json)? Será necessário configurá-las novamente para executar tarefas.')) {
                 const result = await deleteLoginState();
                 if (result) {
                     alert(result.message);
@@ -1599,7 +1599,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         async function updateLoginState(content) {
             saveBtn.disabled = true;
-            saveBtn.textContent = '保存中...';
+            saveBtn.textContent = 'Salvando...';
             try {
                 const response = await fetch('/api/login-state', {
                     method: 'POST',
@@ -1608,9 +1608,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.detail || '更新登录状态失败');
+                    throw new Error(errorData.detail || 'Falha ao atualizar o status de login');
                 }
-                alert('登录状态更新成功！');
+                alert('Status de login atualizado com sucesso!');
                 closeModal();
                 await refreshLoginStatusWidget(); // Refresh the widget UI
                 // Also refresh settings view if it's currently active
@@ -1618,11 +1618,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     await initializeSettingsView();
                 }
             } catch (error) {
-                console.error('更新登录状态时出错:', error);
-                alert(`更新失败: ${error.message}`);
+                console.error('Erro ao atualizar o status de login:', error);
+                alert(`Falha na atualização: ${error.message}`);
             } finally {
                 saveBtn.disabled = false;
-                saveBtn.textContent = '保存';
+                saveBtn.textContent = 'Salvar';
             }
         }
 
@@ -1638,7 +1638,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const content = contentTextarea.value.trim();
             if (!content) {
-                alert('请粘贴从浏览器获取的JSON内容。');
+                alert('Cole o JSON obtido no navegador.');
                 return;
             }
             await updateLoginState(content);

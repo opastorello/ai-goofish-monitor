@@ -13,7 +13,7 @@ IMAGE_SAVE_DIR = "images"
 CONFIG_FILE = "config.json"
 os.makedirs(IMAGE_SAVE_DIR, exist_ok=True)
 
-# 任务隔离的临时图片目录前缀
+# Prefixo para diretórios temporários de imagens isolados por tarefa
 TASK_IMAGE_DIR_PREFIX = "task_images_"
 
 # --- API URL Patterns ---
@@ -57,43 +57,43 @@ IMAGE_DOWNLOAD_HEADERS = {
 }
 
 # --- Client Initialization ---
-# 检查配置是否齐全
+# Verifica se a configuração está completa
 if not all([BASE_URL, MODEL_NAME]):
-    print("警告：未在 .env 文件中完整设置 OPENAI_BASE_URL 和 OPENAI_MODEL_NAME。AI相关功能可能无法使用。")
+    print("Aviso: OPENAI_BASE_URL e OPENAI_MODEL_NAME não estão totalmente definidos no .env. Os recursos de IA podem não funcionar.")
     client = None
 else:
     try:
         if PROXY_URL:
-            print(f"正在为AI请求使用HTTP/S代理: {PROXY_URL}")
-            # httpx 会自动从环境变量中读取代理设置
+            print(f"Usando proxy HTTP/S para requisições de IA: {PROXY_URL}")
+            # httpx lê as configurações de proxy das variáveis de ambiente
             os.environ['HTTP_PROXY'] = PROXY_URL
             os.environ['HTTPS_PROXY'] = PROXY_URL
 
-        # openai 客户端内部的 httpx 会自动从环境变量中获取代理配置
+        # O httpx interno do cliente openai obtém o proxy das variáveis de ambiente
         client = AsyncOpenAI(api_key=API_KEY, base_url=BASE_URL)
     except Exception as e:
-        print(f"初始化 OpenAI 客户端时出错: {e}")
+        print(f"Erro ao inicializar o cliente OpenAI: {e}")
         client = None
 
-# 检查AI客户端是否成功初始化
+# Verifica se o cliente de IA foi inicializado com sucesso
 if not client:
-    # 在 prompt_generator.py 中，如果 client 为 None，会直接报错退出
-    # 在 spider_v2.py 中，AI分析会跳过
-    # 为了保持一致性，这里只打印警告，具体逻辑由调用方处理
+    # Em prompt_generator.py, se client for None, haverá erro e saída imediata
+    # Em spider_v2.py, a análise de IA será ignorada
+    # Para consistência, apenas registramos o aviso aqui; a lógica é tratada pelos chamadores
     pass
 
-# 检查关键配置
+# Verifica as configurações essenciais
 if not all([BASE_URL, MODEL_NAME]) and 'prompt_generator.py' in sys.argv[0]:
-    sys.exit("错误：请确保在 .env 文件中完整设置了 OPENAI_BASE_URL 和 OPENAI_MODEL_NAME。(OPENAI_API_KEY 对于某些服务是可选的)")
+    sys.exit("Erro: defina OPENAI_BASE_URL e OPENAI_MODEL_NAME no arquivo .env. (OPENAI_API_KEY é opcional para alguns serviços)")
 
 def get_ai_request_params(**kwargs):
     """
-    构建AI请求参数，根据ENABLE_THINKING和ENABLE_RESPONSE_FORMAT环境变量决定是否添加相应参数
+    Monta os parâmetros da requisição de IA, adicionando campos conforme ENABLE_THINKING e ENABLE_RESPONSE_FORMAT
     """
     if ENABLE_THINKING:
         kwargs["extra_body"] = {"enable_thinking": False}
     
-    # 如果禁用response_format，则移除该参数
+    # Remove response_format se estiver desativado
     if not ENABLE_RESPONSE_FORMAT and "response_format" in kwargs:
         del kwargs["response_format"]
     
