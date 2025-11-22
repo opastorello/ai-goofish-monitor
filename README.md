@@ -37,7 +37,7 @@ Recomendamos operar o projeto pela interface Web para a melhor experiência.
 Clone o projeto:
 
 ```bash
-git clone https://github.com/Usagi-org/ai-goofish-monitor
+git clone https://github.com/opastorello/ai-goofish-monitor
 cd ai-goofish-monitor
 ```
 
@@ -149,7 +149,7 @@ Use Docker para empacotar o app com dependências e ter deploy rápido e consist
 2. **Clone e configure**:
 
     ```bash
-    git clone https://github.com/Usagi-org/ai-goofish-monitor
+    git clone https://github.com/opastorello/ai-goofish-monitor
     cd ai-goofish-monitor
     ```
 
