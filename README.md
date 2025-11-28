@@ -41,6 +41,19 @@ git clone https://github.com/opastorello/ai-goofish-monitor
 cd ai-goofish-monitor
 ```
 
+Crie e ative um ambiente virtual (recomendado):
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+No Windows, use:
+
+```cmd
+.venv\\Scripts\\activate
+```
+
 Instale as dependências:
 
 ```bash
