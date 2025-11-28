@@ -3,7 +3,18 @@ import os
 from PIL import Image
 import qrcode
 from playwright.async_api import async_playwright
-import pyzbar.pyzbar as pyzbar
+# pyzbar depends on the system library "zbar". When the shared library is
+# missing we still want the script to run, so we import lazily and fall back to
+# saving the QR code image without decoding.
+try:
+    import pyzbar.pyzbar as pyzbar
+except ImportError:
+    pyzbar = None
+    print(
+        "⚠️ pyzbar/zbar não disponível; o QR Code será salvo como imagem para"
+        " leitura manual. Instale o pacote do sistema 'zbar' e a dependência"
+        " Python 'pyzbar' para habilitar a detecção automática."
+    )
 
 STATE_FILE = "xianyu_state.json"
 LOGIN_IS_EDGE = os.getenv("LOGIN_IS_EDGE", "false").lower() == "true"
@@ -54,7 +65,7 @@ async def main():
             return
 
         img = Image.open("qrcode.png")
-        try:
+        if pyzbar:
             qr = pyzbar.decode(img)
             if qr:
                 qr_data = qr[0].data.decode()
@@ -64,9 +75,14 @@ async def main():
                 qr_code.make(fit=True)
                 qr_code.print_ascii(invert=True)
             else:
-                print("⚠️ Nenhum conteúdo do QR Code reconhecido; o QR Code foi salvo como qrcode.png")
-        except ImportError:
-            print("pyzbar não instalado; o QR Code foi salvo como qrcode.png")
+                print(
+                    "⚠️ Nenhum conteúdo do QR Code reconhecido; o QR Code foi salvo"
+                    " como qrcode.png"
+                )
+        else:
+            print(
+                "⚠️ pyzbar não está disponível; o QR Code foi salvo como qrcode.png"
+            )
 
         print("\n" + "=" * 50)
         print("Faça login manualmente na sua conta do Goofish na janela do navegador aberta.")
