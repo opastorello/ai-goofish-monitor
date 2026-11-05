@@ -21,6 +21,7 @@ export interface Task {
   new_publish_option?: string | null;
   region?: string | null;
   seller_id?: string | null;
+  max_items_per_run?: number | null;
   decision_mode: 'ai' | 'keyword';
   keyword_rules: string[];
   is_running: boolean;
@@ -73,6 +74,7 @@ export interface TaskGenerateRequest {
   new_publish_option?: string | null;
   region?: string | null;
   seller_id?: string | null;
+  max_items_per_run?: number | null;
   decision_mode?: 'ai' | 'keyword';
   keyword_rules?: string[];
 }

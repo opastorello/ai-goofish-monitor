@@ -141,6 +141,7 @@ class Task(BaseModel):
     new_publish_option: Optional[str] = None
     region: Optional[str] = None
     seller_id: Optional[str] = None
+    max_items_per_run: Optional[int] = Field(None, ge=1)
     decision_mode: Literal["ai", "keyword"] = "ai"
     keyword_rules: List[str] = Field(default_factory=list)
     is_running: bool = False
@@ -192,6 +193,7 @@ class TaskCreate(BaseModel):
     new_publish_option: Optional[str] = None
     region: Optional[str] = None
     seller_id: Optional[str] = None
+    max_items_per_run: Optional[int] = Field(None, ge=1)
     decision_mode: Literal["ai", "keyword"] = "ai"
     keyword_rules: List[str] = Field(default_factory=list)
 
@@ -265,6 +267,7 @@ class TaskUpdate(BaseModel):
     new_publish_option: Optional[str] = None
     region: Optional[str] = None
     seller_id: Optional[str] = None
+    max_items_per_run: Optional[int] = Field(None, ge=1)
     decision_mode: Optional[Literal["ai", "keyword"]] = None
     keyword_rules: Optional[List[str]] = None
     is_running: Optional[bool] = None
@@ -335,6 +338,7 @@ class TaskGenerateRequest(BaseModel):
     new_publish_option: Optional[str] = None
     region: Optional[str] = None
     seller_id: Optional[str] = None
+    max_items_per_run: Optional[int] = Field(None, ge=1)
     decision_mode: Literal["ai", "keyword"] = "ai"
     keyword_rules: List[str] = Field(default_factory=list)
 

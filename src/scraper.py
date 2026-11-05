@@ -534,6 +534,16 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
         except ValueError:
             return None
 
+    def _positive_int(raw_value) -> int:
+        try:
+            value = int(raw_value)
+        except (TypeError, ValueError):
+            return 0
+        return value if value > 0 else 0
+
+    # 单次运行最多处理的新商品数：调试上限与任务设置取较小的正数（0 = 不限制）
+    item_cap = _positive_int(task_config.get("max_items_per_run"))
+    run_item_limit = min((n for n in (debug_limit, item_cap) if n and n > 0), default=0)
     seller_min_price = _price_bound(task_config.get("min_price"))
     seller_max_price = _price_bound(task_config.get("max_price"))
 
@@ -701,10 +711,15 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
 
                 total_items_on_page = len(basic_items)
                 for i, item_data in enumerate(basic_items, 1):
-                    if debug_limit > 0 and processed_item_count >= debug_limit:
-                        log_time(
-                            f"已达到调试上限 ({debug_limit})，停止获取新商品。"
-                        )
+                    if run_item_limit > 0 and processed_item_count >= run_item_limit:
+                        if debug_limit > 0 and debug_limit <= (item_cap or debug_limit):
+                            log_time(
+                                f"已达到调试上限 ({debug_limit})，停止获取新商品。"
+                            )
+                        else:
+                            log_time(
+                                f"已达到单次运行上限 ({item_cap})，停止获取新商品；其余商品留待下次运行。"
+                            )
                         stop_scraping = True
                         break
 
@@ -908,6 +923,10 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                     seller_cards, seller_name = await collect_seller_cards(
                         page, seller_id, max_scrolls=max(1, int(max_pages or 1))
                     )
+                    if not seller_cards and not seller_name:
+                        # 店铺页没有触发任何接口：通常是被验证页拦截，不能当作“成功且无商品”
+                        print("无法读取店铺页面（未收到商品列表和卖家信息），可能触发了验证。")
+                        raise RiskControlError("seller-page-blank")
                     seller_items = filter_seller_items(
                         seller_cards,
                         keyword=keyword,

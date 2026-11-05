@@ -39,6 +39,7 @@ def build_task_create(req: TaskGenerateRequest, criteria_file: str) -> TaskCreat
         new_publish_option=req.new_publish_option,
         region=req.region,
         seller_id=req.seller_id,
+        max_items_per_run=req.max_items_per_run,
         decision_mode=req.decision_mode or "ai",
         keyword_rules=req.keyword_rules,
     )

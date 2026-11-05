@@ -42,6 +42,7 @@ SCHEMA_STATEMENTS = (
         new_publish_option TEXT,
         region TEXT,
         seller_id TEXT,
+        max_items_per_run INTEGER,
         decision_mode TEXT NOT NULL,
         keyword_rules_json TEXT NOT NULL,
         is_running INTEGER NOT NULL
@@ -145,6 +146,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
         conn.execute(statement)
     _migrate_result_items_status(conn)
     _migrate_tasks_seller_id(conn)
+    _migrate_tasks_max_items_per_run(conn)
     conn.commit()
 
 
@@ -153,6 +155,13 @@ def _migrate_tasks_seller_id(conn: sqlite3.Connection) -> None:
     cols = [r[1] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()]
     if "seller_id" not in cols:
         conn.execute("ALTER TABLE tasks ADD COLUMN seller_id TEXT")
+
+
+def _migrate_tasks_max_items_per_run(conn: sqlite3.Connection) -> None:
+    """为 tasks 表添加 max_items_per_run 列（单次运行最多处理的新商品数）。"""
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()]
+    if "max_items_per_run" not in cols:
+        conn.execute("ALTER TABLE tasks ADD COLUMN max_items_per_run INTEGER")
 
 
 def _migrate_result_items_status(conn: sqlite3.Connection) -> None:

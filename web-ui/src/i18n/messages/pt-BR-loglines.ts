@@ -2,6 +2,8 @@ const ptBRLogLines = {
   logLines: {
     l200: "Modo loja: lendo os anúncios à venda do vendedor {seller_id} (busca por palavra-chave e filtros de busca ignorados)...",
     l201: "Loja '{seller}': {total} anúncios lidos, {matched} atendem às condições.",
+    l202: "Limite por execução atingido ({item_cap}); nenhum novo anúncio será buscado. O restante fica para a próxima execução.",
+    l203: "Não foi possível ler a página da loja (nenhuma lista de anúncios nem dados do vendedor chegaram); provavelmente uma verificação foi acionada.",
     l000: "--- Iniciando tarefa de monitoramento ---",
     l001: "--- Todas as tarefas foram concluídas ---",
     l002: "** Modo de depuração ativo: cada tarefa processa no máximo {args_debug_l} anúncios novos **",

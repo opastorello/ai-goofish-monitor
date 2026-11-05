@@ -2,6 +2,8 @@ const enUSLogLines = {
   logLines: {
     l200: "Store mode: reading the on-sale listings of seller {seller_id} (keyword search and search filters are skipped)...",
     l201: "Store '{seller}': read {total} listings, {matched} match the conditions.",
+    l202: "Per-run limit reached ({item_cap}); no more new items will be fetched. The rest are left for the next run.",
+    l203: "Could not read the store page (no item list or seller info was received); a verification was probably triggered.",
     l000: "--- Starting monitoring task ---",
     l001: "--- All tasks finished ---",
     l002: "** Debug mode on: each task processes at most {args_debug_l} new items **",
