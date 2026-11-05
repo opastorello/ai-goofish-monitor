@@ -346,4 +346,5 @@ async def test_ai_settings(settings: dict):
         return {
             "success": False,
             "message": f"AI模型连接测试失败: {exc}",
+            "error": str(exc),
         }

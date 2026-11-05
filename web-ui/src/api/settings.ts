@@ -153,7 +153,7 @@ export async function updateRotationSettings(settings: RotationSettings): Promis
   })
 }
 
-export async function testAiSettings(settings: AiSettings): Promise<{ success: boolean; message: string; response?: string }> {
+export async function testAiSettings(settings: AiSettings): Promise<{ success: boolean; message: string; error?: string; response?: string }> {
   return await http('/api/settings/ai/test', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
