@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Badge from '@/components/ui/badge/Badge.vue'
 import PriceTrendChart from '@/components/results/PriceTrendChart.vue'
-import { formatNumber, formatRelativeTimeFromNow } from '@/i18n'
+import { formatNumber, formatRelativeTimeFromNow, translateBackendMessage } from '@/i18n'
 import {
   Activity,
   ArrowRight,
@@ -189,10 +189,10 @@ function openActivity(activity: { filename: string | null; type: string }) {
           </Badge>
         </CardHeader>
         <CardContent class="space-y-6 p-6">
-          <div v-if="isLoading" class="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-4 py-10 text-center text-sm text-slate-500">
+          <div v-if="isLoading" class="rounded-2xl border border-dashed border-slate-200 bg-card/60 px-4 py-10 text-center text-sm text-slate-500">
             {{ t('dashboard.focus.loading') }}
           </div>
-          <div v-else-if="!focusTask?.filename" class="rounded-2xl border border-dashed border-slate-200 bg-white/60 px-4 py-10 text-center text-sm text-slate-500">
+          <div v-else-if="!focusTask?.filename" class="rounded-2xl border border-dashed border-slate-200 bg-card/60 px-4 py-10 text-center text-sm text-slate-500">
             {{ t('dashboard.focus.noResults') }}
           </div>
           <template v-else>
@@ -208,7 +208,7 @@ function openActivity(activity: { filename: string | null; type: string }) {
               </article>
             </div>
             <PriceTrendChart :points="focusInsights?.daily_trend || []" />
-            <div class="grid gap-3 rounded-[28px] border border-slate-200/70 bg-white/80 p-5 shadow-sm md:grid-cols-3">
+            <div class="grid gap-3 rounded-[28px] border border-slate-200/70 bg-card/80 p-5 shadow-sm md:grid-cols-3">
               <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
                 {{ t('dashboard.focus.currentMedian') }}
                 <span class="font-semibold text-slate-900">
@@ -254,15 +254,15 @@ function openActivity(activity: { filename: string | null; type: string }) {
                   <div class="flex items-center gap-3 min-w-0">
                     <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></div>
                     <div class="min-w-0">
-                      <p class="text-sm font-bold text-slate-700 truncate">{{ activity.title }}</p>
+                      <p class="text-sm font-bold text-slate-700 truncate">{{ translateBackendMessage(activity.title) }}</p>
                       <p class="text-[11px] text-slate-400">
                         {{ activity.task_name }} · {{ formatRelativeTimeFromNow(activity.timestamp) }}
                       </p>
-                      <p v-if="activity.detail" class="mt-1 text-xs text-slate-500 truncate">{{ activity.detail }}</p>
+                      <p v-if="activity.detail" class="mt-1 text-xs text-slate-500 truncate">{{ translateBackendMessage(activity.detail) }}</p>
                     </div>
                   </div>
                   <Badge variant="outline" class="text-[10px] border-slate-200 shrink-0">
-                    {{ activity.status }}
+                    {{ translateBackendMessage(activity.status) }}
                   </Badge>
                 </div>
               </button>

@@ -51,6 +51,17 @@ export const BACKEND_MESSAGE_RULES: BackendMessageRule[] = [
   { key: 'stepLlm', re: exact('调用 AI 生成标准') },
   { key: 'stepPersist', re: exact('保存分析标准') },
   { key: 'stepTask', re: exact('创建任务记录') },
+  // dashboard activity
+  { key: 'actAiRecommended', re: exact('AI 推荐') },
+  { key: 'actKeywordHit', re: exact('关键词命中') },
+  { key: 'actFoundRecommendation', re: exact('发现推荐商品') },
+  { key: 'actCurrentPrice', re: /^当前价 ¥(?<price>.+)$/ },
+  { key: 'actResultUpdated', re: exact('结果已更新') },
+  { key: 'actSamples', re: /^已累计 (?<count>\d+) 条样本$/ },
+  { key: 'actRunning', re: exact('运行中') },
+  { key: 'actEnabled', re: exact('已启用') },
+  { key: 'actPolling', re: exact('任务正在轮询闲鱼结果') },
+  { key: 'actWaitingSchedule', re: exact('等待下一次调度执行') },
   // accounts
   { key: 'accountNameInvalid', re: exact('账号名称只能包含字母、数字、下划线或短横线。') },
   { key: 'invalidJson', re: exact('提供的内容不是有效的JSON格式。') },
