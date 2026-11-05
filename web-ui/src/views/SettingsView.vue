@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { translateBackendMessage } from '@/i18n'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSettings } from '@/composables/useSettings'
@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from '@/components/ui/toast'
+import { listAiModels } from '@/api/settings'
 import { getPromptContent, listPrompts, updatePrompt } from '@/api/prompts'
 import NotificationSettingsPanel from '@/components/settings/NotificationSettingsPanel.vue'
 import RotationSettingsPanel from '@/components/settings/RotationSettingsPanel.vue'
@@ -93,6 +94,56 @@ async function handleSaveRotation() {
     notifyError(t('settings.rotation.saveFailed'), (e as Error).message)
   }
 }
+
+const availableModels = ref<string[]>([])
+const isLoadingModels = ref(false)
+const modelsError = ref<string | null>(null)
+const typeModelManually = ref(false)
+const hasFetchedModels = ref(false)
+
+// Keep the saved model selectable even if the provider does not list it.
+const modelOptions = computed(() => {
+  const current = aiSettings.value.OPENAI_MODEL_NAME
+  return current && !availableModels.value.includes(current)
+    ? [current, ...availableModels.value]
+    : availableModels.value
+})
+
+async function fetchModels() {
+  if (!aiSettings.value.OPENAI_BASE_URL) return
+  isLoadingModels.value = true
+  modelsError.value = null
+  try {
+    const payload = { ...aiSettings.value }
+    const apiKey = (payload.OPENAI_API_KEY || '').trim()
+    if (apiKey) payload.OPENAI_API_KEY = apiKey
+    else delete payload.OPENAI_API_KEY
+    const res = await listAiModels(payload)
+    if (res.success) {
+      availableModels.value = res.models
+      typeModelManually.value = res.models.length === 0
+      if (res.models.length === 0) modelsError.value = t('settings.ai.modelsEmpty')
+    } else {
+      availableModels.value = []
+      typeModelManually.value = true
+      modelsError.value = res.error ?? t('settings.ai.modelsFailed')
+    }
+  } catch (e) {
+    availableModels.value = []
+    typeModelManually.value = true
+    modelsError.value = (e as Error).message
+  } finally {
+    isLoadingModels.value = false
+  }
+}
+
+// Pull the model list once the saved settings are loaded.
+watch(isReady, (ready) => {
+  if (ready && !hasFetchedModels.value) {
+    hasFetchedModels.value = true
+    void fetchModels()
+  }
+}, { immediate: true })
 
 async function handleTestAi() {
   try {
@@ -225,7 +276,41 @@ watch(selectedPrompt, async (value) => {
             </div>
             <div class="grid gap-2">
               <Label>{{ t('settings.ai.modelName') }}</Label>
-              <Input v-model="aiSettings.OPENAI_MODEL_NAME" placeholder="gpt-3.5-turbo" />
+              <div class="flex gap-2">
+                <Select
+                  v-if="modelOptions.length && !typeModelManually"
+                  v-model="aiSettings.OPENAI_MODEL_NAME"
+                >
+                  <SelectTrigger class="flex-1">
+                    <SelectValue :placeholder="t('settings.ai.modelPlaceholder')" />
+                  </SelectTrigger>
+                  <SelectContent class="max-h-72">
+                    <SelectItem v-for="model in modelOptions" :key="model" :value="model">{{ model }}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input v-else v-model="aiSettings.OPENAI_MODEL_NAME" class="flex-1" placeholder="gpt-3.5-turbo" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  :disabled="isLoadingModels || !aiSettings.OPENAI_BASE_URL"
+                  @click="fetchModels"
+                >
+                  {{ isLoadingModels ? t('settings.ai.loadingModels') : t('settings.ai.loadModels') }}
+                </Button>
+              </div>
+              <p v-if="modelsError" class="text-xs text-amber-600">
+                {{ t('settings.ai.modelsFailedHint', { error: modelsError }) }}
+              </p>
+              <p v-else-if="availableModels.length" class="text-xs text-gray-500">
+                {{ t('settings.ai.modelsLoaded', { count: availableModels.length }) }}
+                <button
+                  type="button"
+                  class="ml-1 text-primary underline-offset-2 hover:underline"
+                  @click="typeModelManually = !typeModelManually"
+                >
+                  {{ typeModelManually ? t('settings.ai.pickFromList') : t('settings.ai.typeManually') }}
+                </button>
+              </p>
             </div>
             <div class="grid gap-2">
               <Label>{{ t('settings.ai.proxy') }}</Label>

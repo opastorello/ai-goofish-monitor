@@ -285,6 +285,36 @@ async def update_ai_settings(settings: AISettingsModel):
     return {"message": "AI设置已成功更新"}
 
 
+@router.post("/ai/models")
+async def list_ai_models(settings: dict):
+    """List the models exposed by an OpenAI-compatible endpoint (GET /models)."""
+    try:
+        import asyncio
+        import httpx
+        from openai import OpenAI
+
+        api_key = settings.get("OPENAI_API_KEY") or env_manager.get_value("OPENAI_API_KEY", "")
+        base_url = (settings.get("OPENAI_BASE_URL") or "").strip()
+        if not base_url:
+            return {"success": False, "models": [], "error": "OPENAI_BASE_URL is empty"}
+
+        client_params = {
+            "api_key": api_key,
+            "base_url": base_url,
+            "timeout": httpx.Timeout(20.0),
+        }
+        proxy_url = settings.get("PROXY_URL", "")
+        if proxy_url:
+            client_params["http_client"] = httpx.Client(proxy=proxy_url)
+
+        client = OpenAI(**client_params)
+        page = await asyncio.to_thread(lambda: list(client.models.list()))
+        model_ids = sorted({str(model.id) for model in page if getattr(model, "id", None)})
+        return {"success": True, "models": model_ids}
+    except Exception as exc:
+        return {"success": False, "models": [], "error": str(exc)}
+
+
 @router.post("/ai/test")
 async def test_ai_settings(settings: dict):
     """测试AI模型设置是否有效"""
