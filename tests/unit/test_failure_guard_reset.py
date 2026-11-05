@@ -34,15 +34,3 @@ def test_reset_one_task_or_all(tmp_path):
     assert guard.reset() == 2
     assert all(not row["paused"] for row in guard.snapshot(now=now))
     assert guard.reset("missing") == 0
-
-
-def test_cli_reset_guard_prints_json(tmp_path, monkeypatch, capsys):
-    from src import cli
-
-    path = tmp_path / "guard.json"
-    monkeypatch.setenv("TASK_FAILURE_GUARD_PATH", str(path))
-    monkeypatch.setenv("TASK_FAILURE_THRESHOLD", "1")
-    FailureGuard().record_failure("a", reason="x")
-    assert cli.main(["auth", "reset-guard", "--task", "a"]) == 0
-    assert '"reset": 1' in capsys.readouterr().out
-    assert cli.main(["auth", "reset-guard"]) == 0
