@@ -11,6 +11,10 @@ const zhCN = {
     en: 'English',
     pt: 'Português',
   },
+  theme: {
+    switchToLight: '切换到浅色模式',
+    switchToDark: '切换到深色模式',
+  },
   routes: {
     login: '登录',
     dashboard: '监控概览',

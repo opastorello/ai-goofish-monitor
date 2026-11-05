@@ -1,4 +1,16 @@
 const animate = require("tailwindcss-animate")
+const defaultColors = require("tailwindcss/colors")
+
+// Palettes backed by CSS variables so the same utilities adapt to dark mode (see main.css).
+const themed = (family, shades) =>
+  Object.fromEntries(
+    Object.keys(defaultColors[family]).map((shade) => [
+      shade,
+      shades.includes(shade) ? `rgb(var(--${family}-${shade}) / <alpha-value>)` : defaultColors[family][shade],
+    ]),
+  )
+const ALL = Object.keys(defaultColors.slate)
+const TINTS = ["50", "100", "200", "600", "700"]
 
 module.exports = {
   darkMode: ["class"],
@@ -19,6 +31,15 @@ module.exports = {
     },
     extend: {
       colors: {
+        slate: themed("slate", ALL),
+        gray: themed("gray", ALL),
+        emerald: themed("emerald", TINTS),
+        rose: themed("rose", TINTS),
+        red: themed("red", TINTS),
+        green: themed("green", TINTS),
+        blue: themed("blue", TINTS),
+        amber: themed("amber", TINTS),
+        sky: themed("sky", TINTS),
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

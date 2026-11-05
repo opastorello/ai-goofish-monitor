@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import LocaleToggle from '@/components/layout/LocaleToggle.vue'
+import ThemeToggle from '@/components/layout/ThemeToggle.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -50,7 +51,8 @@ async function handleLogin() {
       <div class="absolute left-[-10%] top-[-10%] h-72 w-72 rounded-full bg-primary/10 blur-3xl"></div>
       <div class="absolute bottom-[-10%] right-[-5%] h-72 w-72 rounded-full bg-blue-300/10 blur-3xl"></div>
     </div>
-    <div class="absolute right-6 top-6">
+    <div class="absolute right-6 top-6 flex items-center gap-2">
+      <ThemeToggle />
       <LocaleToggle />
     </div>
     <Card class="app-surface relative z-10 w-full max-w-md border-none">

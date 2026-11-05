@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import DashboardTaskSearch from '@/components/layout/DashboardTaskSearch.vue'
 import LocaleToggle from '@/components/layout/LocaleToggle.vue'
+import ThemeToggle from '@/components/layout/ThemeToggle.vue'
 import { 
   Zap, 
   Bell, 
@@ -38,7 +39,7 @@ function goPrompts() {
 </script>
 
 <template>
-  <header class="flex items-center justify-between px-6 h-16 bg-white/60 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-[100]">
+  <header class="flex items-center justify-between px-6 h-16 bg-card/60 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-[100]">
     <!-- Brand Logo -->
     <RouterLink
       to="/dashboard"
@@ -67,9 +68,9 @@ function goPrompts() {
           readonly
           aria-disabled="true"
           :placeholder="t('header.searchUnavailable')"
-          class="w-full h-10 pl-10 pr-4 bg-slate-100/50 border border-slate-200/50 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white focus:border-primary/50"
+          class="w-full h-10 pl-10 pr-4 bg-slate-100/50 border border-slate-200/50 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-card focus:border-primary/50"
         />
-        <kbd class="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded border border-slate-300 bg-white text-[10px] text-slate-400 font-sans shadow-sm pointer-events-none">
+        <kbd class="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded border border-slate-300 bg-card text-[10px] text-slate-400 font-sans shadow-sm pointer-events-none">
           /
         </kbd>
       </div>
@@ -78,6 +79,7 @@ function goPrompts() {
     <!-- Actions -->
     <div class="flex items-center gap-3">
       <div class="flex items-center gap-2">
+        <ThemeToggle />
         <LocaleToggle />
       </div>
 

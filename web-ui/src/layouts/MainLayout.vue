@@ -35,7 +35,7 @@ const { t } = useI18n()
           :aria-label="t('common.close')"
           @click="closeMobileNav"
         />
-        <aside class="relative h-full w-72 border-r border-slate-200/60 bg-white/90 p-4 shadow-2xl backdrop-blur-xl">
+        <aside class="relative h-full w-72 border-r border-slate-200/60 bg-card/90 p-4 shadow-2xl backdrop-blur-xl">
           <TheSidebar class="pt-16" @navigate="closeMobileNav" />
         </aside>
       </div>
@@ -43,7 +43,7 @@ const { t } = useI18n()
 
     <div class="flex flex-grow relative z-10">
       <!-- Sidebar -->
-      <aside class="hidden md:block w-64 flex-shrink-0 border-r border-slate-200/60 bg-white/40 backdrop-blur-sm">
+      <aside class="hidden md:block w-64 flex-shrink-0 border-r border-slate-200/60 bg-card/40 backdrop-blur-sm">
         <TheSidebar class="sticky top-16 h-[calc(100vh-4rem)] p-4" />
       </aside>
 

@@ -11,6 +11,10 @@ const ptBR = {
     en: 'English',
     pt: 'Português',
   },
+  theme: {
+    switchToLight: 'Mudar para o modo claro',
+    switchToDark: 'Mudar para o modo escuro',
+  },
   routes: {
     login: 'Login',
     dashboard: 'Painel',

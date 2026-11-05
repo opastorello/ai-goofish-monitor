@@ -86,7 +86,7 @@ const areaPath = computed(() => {
       </div>
     </div>
 
-    <div v-if="validPoints.length === 0" class="rounded-2xl border border-dashed border-slate-200 bg-white/70 px-4 py-10 text-center text-sm text-slate-500">
+    <div v-if="validPoints.length === 0" class="rounded-2xl border border-dashed border-slate-200 bg-card/70 px-4 py-10 text-center text-sm text-slate-500">
       {{ t('results.chart.noTrend') }}
     </div>
 

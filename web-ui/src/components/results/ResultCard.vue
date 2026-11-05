@@ -53,7 +53,7 @@ const expanded = ref(false)
 </script>
 
 <template>
-  <Card class="group flex flex-col h-full border-none shadow-glass hover:shadow-card-hover transition-all duration-300 rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm" :class="{ 'opacity-50': isHidden }">
+  <Card class="group flex flex-col h-full border-none shadow-glass hover:shadow-card-hover transition-all duration-300 rounded-2xl overflow-hidden bg-card/80 backdrop-blur-sm" :class="{ 'opacity-50': isHidden }">
     <!-- Image Header -->
     <div class="relative aspect-[4/3] overflow-hidden">
       <div class="absolute inset-0 bg-slate-200 animate-pulse" v-if="!imageUrl"></div>
@@ -73,7 +73,7 @@ const expanded = ref(false)
         <Badge v-if="isRecommended && !isHidden" variant="default" class="bg-emerald-500/90 backdrop-blur-md border-none shadow-sm">
           {{ t('results.card.curated') }}
         </Badge>
-        <Badge v-if="isRuleHidden" variant="secondary" class="bg-slate-900/75 text-white border-none backdrop-blur-md shadow-sm">
+        <Badge v-if="isRuleHidden" variant="secondary" class="bg-slate-900/75 text-white dark:bg-black/70 border-none backdrop-blur-md shadow-sm">
           {{ t('results.card.blacklisted') }}
         </Badge>
       </div>
@@ -83,7 +83,7 @@ const expanded = ref(false)
           type="button"
           @click="emit('toggle-block', props.item)"
           :aria-label="isHidden ? t('results.card.unblock') : t('results.card.block')"
-          class="flex rounded-full bg-white/30 p-1.5 text-white backdrop-blur-md border border-white/40 shadow-sm opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 hover:bg-white/50"
+          class="flex rounded-full bg-card/30 p-1.5 text-white backdrop-blur-md border border-white/40 shadow-sm opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 hover:bg-card/50"
         >
           <EyeOff v-if="!isHidden" class="w-4 h-4" />
           <Eye v-else class="w-4 h-4" />
@@ -93,7 +93,7 @@ const expanded = ref(false)
            target="_blank"
            rel="noopener noreferrer"
            :aria-label="t('results.card.detail')"
-           class="flex rounded-full bg-white/30 p-1.5 text-white backdrop-blur-md border border-white/40 shadow-sm opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+           class="flex rounded-full bg-card/30 p-1.5 text-white backdrop-blur-md border border-white/40 shadow-sm opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
          >
             <ExternalLink class="w-4 h-4" />
          </a>
@@ -128,7 +128,7 @@ const expanded = ref(false)
           </div>
         </div>
         
-        <div class="w-full h-1.5 bg-white/50 rounded-full overflow-hidden mb-3">
+        <div class="w-full h-1.5 bg-card/50 rounded-full overflow-hidden mb-3">
           <div 
             class="h-full transition-all duration-1000 ease-out rounded-full" 
             :class="recommendationStatus.color"

@@ -11,6 +11,10 @@ const enUS = {
     en: 'English',
     pt: 'Português',
   },
+  theme: {
+    switchToLight: 'Switch to light mode',
+    switchToDark: 'Switch to dark mode',
+  },
   routes: {
     login: 'Login',
     dashboard: 'Dashboard',

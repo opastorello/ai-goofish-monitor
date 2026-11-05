@@ -175,18 +175,18 @@ onBeforeUnmount(() => {
       v-model="query"
       type="text"
       :placeholder="t('tasks.search.placeholder')"
-      class="w-full h-10 rounded-xl border border-slate-200/60 bg-slate-100/60 pl-10 pr-16 text-sm text-slate-700 transition-all outline-none focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/15"
+      class="w-full h-10 rounded-xl border border-slate-200/60 bg-slate-100/60 pl-10 pr-16 text-sm text-slate-700 transition-all outline-none focus:border-primary/40 focus:bg-card focus:ring-2 focus:ring-primary/15"
       @focus="openPanel"
       @keydown="handleKeydown"
     />
-    <kbd class="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-400 shadow-sm">
+    <kbd class="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-slate-300 bg-card px-1.5 py-0.5 text-[10px] text-slate-400 shadow-sm">
       ESC
     </kbd>
 
     <transition name="search-panel">
       <div
         v-if="shouldShowPanel"
-        class="absolute inset-x-0 top-[calc(100%+0.75rem)] overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95 shadow-[0_28px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl"
+        class="absolute inset-x-0 top-[calc(100%+0.75rem)] overflow-hidden rounded-[28px] border border-slate-200/80 bg-card/95 shadow-[0_28px_70px_rgba(15,23,42,0.16)] backdrop-blur-xl"
       >
         <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
           <div>
@@ -219,7 +219,7 @@ onBeforeUnmount(() => {
             v-for="(task, index) in visibleTasks"
             :key="task.id"
             class="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors"
-            :class="index === highlightedIndex ? 'bg-slate-900 text-white' : 'hover:bg-slate-50 text-slate-800'"
+            :class="index === highlightedIndex ? 'bg-slate-900 text-white dark:bg-primary' : 'hover:bg-slate-50 text-slate-800'"
             @mouseenter="highlightedIndex = index"
             @click="selectTask(task)"
           >
@@ -233,7 +233,7 @@ onBeforeUnmount(() => {
                 <Badge
                   variant="outline"
                   class="shrink-0 text-[10px]"
-                  :class="index === highlightedIndex ? 'border-white/20 bg-white/10 text-white' : 'border-slate-200 text-slate-500'"
+                  :class="index === highlightedIndex ? 'border-white/20 bg-card/10 text-white' : 'border-slate-200 text-slate-500'"
                 >
                   {{ getTaskStatus(task) }}
                 </Badge>

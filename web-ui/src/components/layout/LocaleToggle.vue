@@ -15,7 +15,7 @@ const localeOptions = [
 
 <template>
   <div
-    class="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 p-1 shadow-sm backdrop-blur"
+    class="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-card/80 p-1 shadow-sm backdrop-blur"
     :aria-label="t('locale.switchLabel')"
     role="group"
   >

@@ -160,7 +160,7 @@ const emit = defineEmits<{
           </div>
 
           <div class="mt-4 grid gap-3 sm:grid-cols-2">
-            <div class="rounded-xl border border-slate-200/70 bg-white/80 p-3">
+            <div class="rounded-xl border border-slate-200/70 bg-card/80 p-3">
               <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
                 {{ t('tasks.table.headers.crawl') }}
               </p>
@@ -181,7 +181,7 @@ const emit = defineEmits<{
               </div>
             </div>
 
-            <div class="rounded-xl border border-slate-200/70 bg-white/80 p-3">
+            <div class="rounded-xl border border-slate-200/70 bg-card/80 p-3">
               <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
                 {{ t('tasks.table.headers.schedule') }}
               </p>
@@ -203,7 +203,7 @@ const emit = defineEmits<{
               </div>
             </div>
 
-            <div class="rounded-xl border border-slate-200/70 bg-white/80 p-3 sm:col-span-2">
+            <div class="rounded-xl border border-slate-200/70 bg-card/80 p-3 sm:col-span-2">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
@@ -321,7 +321,7 @@ const emit = defineEmits<{
             <TableRow
               v-for="task in tasks"
               :key="task.id"
-              class="group hover:bg-white/80 transition-all duration-300 border-b border-slate-100/50 last:border-0"
+              class="group hover:bg-card/80 transition-all duration-300 border-b border-slate-100/50 last:border-0"
             >
             <!-- Column 1: Status -->
             <TableCell class="px-6 align-middle">
@@ -388,10 +388,10 @@ const emit = defineEmits<{
                   </span>
                 </div>
                 <div class="flex flex-wrap gap-1.5">
-                  <Badge variant="outline" class="text-[9px] h-4 border-slate-100 text-slate-400 px-1.5 font-bold bg-white/40">
+                  <Badge variant="outline" class="text-[9px] h-4 border-slate-100 text-slate-400 px-1.5 font-bold bg-card/40">
                     {{ task.personal_only ? t('tasks.table.personalOnly') : t('common.all') }}
                   </Badge>
-                  <Badge variant="outline" class="text-[9px] h-4 border-slate-100 text-slate-400 px-1.5 font-bold bg-white/40">
+                  <Badge variant="outline" class="text-[9px] h-4 border-slate-100 text-slate-400 px-1.5 font-bold bg-card/40">
                     {{ task.free_shipping ? t('tasks.table.freeShipping') : t('common.all') }}
                   </Badge>
                   <div v-if="task.region" class="flex items-center gap-0.5 text-[9px] font-bold text-slate-400 px-1.5 h-4 bg-slate-50/50 rounded border border-slate-100 truncate max-w-[80px]">

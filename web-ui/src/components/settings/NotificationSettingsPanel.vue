@@ -210,7 +210,7 @@ function resolveChannelBadge(channel: ChannelKey) {
           </div>
           <div class="flex flex-wrap gap-2">
             <Badge variant="outline" class="border-sky-200 bg-sky-50 text-sky-700">{{ t('notifyPanel.enabledChannels', { channels: summaryText }) }}</Badge>
-            <Badge variant="outline" class="border-slate-200 bg-white text-slate-600">{{ t('notifyPanel.supportedVariables') }}</Badge>
+            <Badge variant="outline" class="border-slate-200 bg-card text-slate-600">{{ t('notifyPanel.supportedVariables') }}</Badge>
           </div>
         </div>
       </CardHeader>
@@ -227,12 +227,12 @@ function resolveChannelBadge(channel: ChannelKey) {
             </div>
           </div>
         </div>
-        <div class="app-surface-subtle bg-slate-900/95 p-4 text-slate-100">
+        <div class="app-surface-subtle bg-slate-900/95 p-4 text-slate-100 dark:bg-card dark:text-foreground">
           <div class="flex items-center gap-2 text-sm font-semibold">
             <ShieldCheck class="h-4 w-4 text-emerald-300" />
             {{ t('notifyPanel.configurationNotes') }}
           </div>
-          <p class="mt-2 text-sm leading-6 text-slate-300">{{ t('notifyPanel.configurationNotesDescription') }}</p>
+          <p class="mt-2 text-sm leading-6 text-slate-300 dark:text-muted-foreground">{{ t('notifyPanel.configurationNotesDescription') }}</p>
         </div>
       </CardContent>
     </Card>
@@ -309,7 +309,7 @@ function resolveChannelBadge(channel: ChannelKey) {
           </div>
           <div class="rounded-2xl border border-dashed border-rose-200 bg-rose-50/70 px-4 py-3 text-sm text-rose-700">
             <p>{{ t('notifyPanel.webhook.variablesHelp') }}</p>
-            <p class="mt-2 break-all font-mono text-xs text-rose-900">{{ webhookTemplateVariables }}</p>
+            <p class="mt-2 break-all font-mono text-xs text-rose-900 dark:text-rose-300">{{ webhookTemplateVariables }}</p>
           </div>
         </CardContent>
         <CardFooter class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><Badge :variant="isChannelConfigured('webhook') ? 'default' : 'outline'">{{ resolveChannelBadge('webhook') }}</Badge><div class="flex flex-wrap gap-2"><Button variant="ghost" size="sm" :disabled="props.isSaving" @click="clearChannel('webhook')"><Trash2 class="h-4 w-4" />{{ t('notifyPanel.clear') }}</Button><Button variant="outline" size="sm" :disabled="props.isSaving" @click="handleTest('webhook')"><TestTube2 class="h-4 w-4" />{{ t('notifyPanel.test') }}</Button></div></CardFooter>

@@ -27,7 +27,7 @@ function resolveStepDotClass(step: TaskGenerationStep) {
   if (step.status === 'completed') return 'border-emerald-500 bg-emerald-500'
   if (step.status === 'running') return 'border-amber-500 bg-amber-500 shadow-[0_0_0_4px_rgba(245,158,11,0.18)]'
   if (step.status === 'failed') return 'border-red-500 bg-red-500'
-  return 'border-slate-300 bg-white'
+  return 'border-slate-300 bg-card'
 }
 
 function resolveStepTextClass(step: TaskGenerationStep) {
@@ -58,7 +58,7 @@ function resolveStepTextClass(step: TaskGenerationStep) {
       <div
         v-for="step in job.steps"
         :key="step.key"
-        class="flex items-start gap-3 rounded-xl border border-white/70 bg-white px-3 py-2"
+        class="flex items-start gap-3 rounded-xl border border-white/70 bg-card px-3 py-2"
       >
         <span
           class="mt-1 h-3 w-3 shrink-0 rounded-full border-2 transition-colors"
