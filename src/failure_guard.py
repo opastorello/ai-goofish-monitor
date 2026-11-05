@@ -355,3 +355,55 @@ class FailureGuard:
 
         self._update_task(task_key, _apply)
         return result
+
+    def snapshot(self, *, now: Optional[datetime] = None) -> list[dict]:
+        """List the tracked tasks with their current failure/pause state."""
+        current = _now(self.tz_name, now=now)
+        tasks = self._load().get("tasks", {})
+        rows = []
+        for name, entry in sorted(tasks.items()):
+            if not isinstance(entry, dict):
+                continue
+            paused_until = _str_to_dt(entry.get("paused_until"))
+            paused = bool(paused_until and current < paused_until)
+            rows.append(
+                {
+                    "task_name": name,
+                    "consecutive_failures": _as_int(entry.get("consecutive_failures"), 0),
+                    "paused": paused,
+                    "paused_until": entry.get("paused_until") if paused else None,
+                    "last_failure_at": entry.get("last_failure_at"),
+                    "last_failure_reason": entry.get("last_failure_reason"),
+                    "last_success_at": entry.get("last_success_at"),
+                }
+            )
+        return rows
+
+    def reset(self, task_key: Optional[str] = None) -> int:
+        """
+        Manually lift the circuit breaker ("auth reset-guard"): clear the failure
+        counter and pause of one task, or of every task when task_key is None.
+        Returns how many tasks were reset.
+        """
+        _ensure_parent_dir(self.path)
+        with open(self.path, "a+", encoding="utf-8") as fh:
+            with _FileLock(fh):
+                fh.seek(0)
+                data = self._load()
+                tasks = data.setdefault("tasks", {})
+                keys = [task_key] if task_key is not None else list(tasks)
+                reset_count = 0
+                for key in keys:
+                    entry = tasks.get(key)
+                    if not isinstance(entry, dict):
+                        continue
+                    entry["consecutive_failures"] = 0
+                    entry["paused_until"] = None
+                    entry["last_notified_date"] = None
+                    entry["last_failure_reason"] = None
+                    entry["last_failure_at"] = None
+                    entry["cookie_path"] = None
+                    entry["cookie_mtime"] = None
+                    reset_count += 1
+                self._save(data)
+                return reset_count

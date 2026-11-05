@@ -36,3 +36,46 @@ export async function updateAccount(name: string, content: string): Promise<Acco
 export async function deleteAccount(name: string): Promise<{ message: string }> {
   return await http(`/api/accounts/${encodeURIComponent(name)}`, { method: 'DELETE' })
 }
+
+export interface AccountStatus {
+  name: string
+  valid: boolean
+  status: 'valid' | 'expired' | 'risk_control' | 'missing_token' | 'missing_file' | 'invalid_file' | 'error'
+  nick: string
+  unb: string
+  tracknick: string
+  reason: string
+  checked_at: string
+}
+
+export interface GuardTask {
+  task_name: string
+  consecutive_failures: number
+  paused: boolean
+  paused_until: string | null
+  last_failure_at: string | null
+  last_failure_reason: string | null
+  last_success_at: string | null
+}
+
+export interface GuardState {
+  threshold: number
+  pause_seconds: number
+  tasks: GuardTask[]
+}
+
+export async function getAccountStatus(name: string): Promise<AccountStatus> {
+  return await http(`/api/accounts/${encodeURIComponent(name)}/status`)
+}
+
+export async function getGuardState(): Promise<GuardState> {
+  return await http('/api/accounts/guard')
+}
+
+export async function resetGuard(taskName?: string): Promise<{ message: string; reset: number }> {
+  return await http('/api/accounts/guard/reset', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(taskName ? { task_name: taskName } : {}),
+  })
+}

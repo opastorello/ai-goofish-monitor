@@ -4,11 +4,14 @@
 import json
 import os
 import re
+import asyncio
 import aiofiles
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
+from src.failure_guard import FailureGuard
 from src.infrastructure.config.env_manager import env_manager
+from src.services.login_status_service import check_login_state
 
 
 router = APIRouter(prefix="/api/accounts", tags=["accounts"])
@@ -75,6 +78,40 @@ async def list_accounts():
             "path": os.path.join(state_dir, filename),
         })
     return accounts
+
+
+class GuardResetRequest(BaseModel):
+    task_name: Optional[str] = None
+
+
+@router.get("/guard", response_model=dict)
+async def get_guard_state():
+    """风控保护（熔断）状态：各任务的连续失败数与暂停情况。"""
+    guard = FailureGuard()
+    return {
+        "threshold": guard.threshold,
+        "pause_seconds": guard.pause_seconds,
+        "tasks": await asyncio.to_thread(guard.snapshot),
+    }
+
+
+@router.post("/guard/reset", response_model=dict)
+async def reset_guard(body: Optional[GuardResetRequest] = None):
+    """手动解除风控熔断；不传 task_name 时重置全部任务。"""
+    guard = FailureGuard()
+    task_name = body.task_name if body else None
+    count = await asyncio.to_thread(guard.reset, task_name)
+    return {"message": "风控保护已重置", "reset": count}
+
+
+@router.get("/{name}/status", response_model=dict)
+async def get_account_status(name: str):
+    """检查账号登录态是否仍然有效（不启动浏览器，只发一次轻量请求）。"""
+    path = _account_path(name)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="账号不存在")
+    result = await asyncio.to_thread(check_login_state, path)
+    return {"name": name, **result}
 
 
 @router.get("/{name}", response_model=dict)

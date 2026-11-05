@@ -2,7 +2,21 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { listAccounts, getAccount, createAccount, updateAccount, deleteAccount, type AccountItem } from '@/api/accounts'
+import {
+  listAccounts,
+  getAccount,
+  createAccount,
+  updateAccount,
+  deleteAccount,
+  getAccountStatus,
+  getGuardState,
+  resetGuard,
+  type AccountItem,
+  type AccountStatus,
+  type GuardState,
+} from '@/api/accounts'
+import { Badge } from '@/components/ui/badge'
+import { formatDateTime } from '@/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -27,6 +41,79 @@ const newContent = ref('')
 const editName = ref('')
 const editContent = ref('')
 const deleteName = ref('')
+
+type StatusEntry = { loading: boolean; result?: AccountStatus; error?: string }
+const statuses = ref<Record<string, StatusEntry>>({})
+const guard = ref<GuardState | null>(null)
+const isGuardLoading = ref(false)
+const isResettingGuard = ref(false)
+
+async function checkStatus(name: string) {
+  statuses.value = { ...statuses.value, [name]: { loading: true } }
+  try {
+    const result = await getAccountStatus(name)
+    statuses.value = { ...statuses.value, [name]: { loading: false, result } }
+  } catch (e) {
+    statuses.value = { ...statuses.value, [name]: { loading: false, error: (e as Error).message } }
+  }
+}
+
+async function checkAllStatuses() {
+  for (const account of accounts.value) {
+    await checkStatus(account.name)
+  }
+}
+
+function statusLabel(entry?: StatusEntry): string {
+  if (!entry) return t('accounts.status.notChecked')
+  if (entry.loading) return t('accounts.status.checking')
+  if (entry.error || !entry.result) return t('accounts.status.error')
+  const { status, nick, tracknick } = entry.result
+  const label = t(`accounts.status.${status}`)
+  const name = nick || tracknick
+  return status === 'valid' && name ? `${label} · ${name}` : label
+}
+
+function statusClass(entry?: StatusEntry): string {
+  if (!entry || entry.loading) return 'bg-slate-100 text-slate-600'
+  if (entry.result?.valid) return 'bg-emerald-50 text-emerald-700'
+  if (entry.result?.status === 'risk_control') return 'bg-amber-50 text-amber-700'
+  return 'bg-rose-50 text-rose-700'
+}
+
+function statusHint(entry?: StatusEntry): string {
+  if (!entry) return ''
+  if (entry.error) return entry.error
+  if (!entry.result) return ''
+  const checked = formatDateTime(entry.result.checked_at, { dateStyle: 'short', timeStyle: 'medium' })
+  return entry.result.valid
+    ? t('accounts.status.checkedAt', { time: checked })
+    : `${entry.result.reason || ''} (${checked})`.trim()
+}
+
+async function fetchGuard() {
+  isGuardLoading.value = true
+  try {
+    guard.value = await getGuardState()
+  } catch (e) {
+    toast({ title: t('accounts.guard.loadFailed'), description: (e as Error).message, variant: 'destructive' })
+  } finally {
+    isGuardLoading.value = false
+  }
+}
+
+async function handleResetGuard(taskName?: string) {
+  isResettingGuard.value = true
+  try {
+    await resetGuard(taskName)
+    toast({ title: t('accounts.guard.resetDone') })
+    await fetchGuard()
+  } catch (e) {
+    toast({ title: t('accounts.guard.resetFailed'), description: (e as Error).message, variant: 'destructive' })
+  } finally {
+    isResettingGuard.value = false
+  }
+}
 
 async function fetchAccounts() {
   isLoading.value = true
@@ -118,7 +205,10 @@ async function handleDeleteAccount() {
   }
 }
 
-onMounted(fetchAccounts)
+onMounted(() => {
+  void fetchAccounts()
+  void fetchGuard()
+})
 </script>
 
 <template>
@@ -163,9 +253,55 @@ onMounted(fetchAccounts)
     </Card>
 
     <Card class="app-surface border-none">
-      <CardHeader>
-        <CardTitle>{{ t('accounts.list.title') }}</CardTitle>
-        <CardDescription>{{ t('accounts.list.description') }}</CardDescription>
+      <CardHeader class="flex flex-row items-start justify-between gap-4 space-y-0">
+        <div class="space-y-1.5">
+          <CardTitle>{{ t('accounts.guard.title') }}</CardTitle>
+          <CardDescription>{{ t('accounts.guard.description', { threshold: guard?.threshold ?? 3 }) }}</CardDescription>
+        </div>
+        <div class="flex shrink-0 gap-2">
+          <Button size="sm" variant="outline" :disabled="isGuardLoading" @click="fetchGuard">{{ t('common.refresh') }}</Button>
+          <Button size="sm" :disabled="isResettingGuard || !guard?.tasks.length" @click="handleResetGuard()">{{ t('accounts.guard.resetAll') }}</Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p v-if="!guard?.tasks.length" class="py-4 text-center text-sm text-muted-foreground">{{ t('accounts.guard.empty') }}</p>
+        <ul v-else class="divide-y divide-slate-100">
+          <li v-for="task in guard.tasks" :key="task.task_name" class="flex flex-wrap items-center justify-between gap-3 py-3">
+            <div class="min-w-0 space-y-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="truncate text-sm font-semibold text-slate-800">{{ task.task_name }}</span>
+                <Badge variant="outline" :class="task.paused ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'">
+                  {{ task.paused ? t('accounts.guard.paused') : t('accounts.guard.active') }}
+                </Badge>
+                <span class="text-xs text-slate-500">{{ t('accounts.guard.failures', { count: task.consecutive_failures, threshold: guard.threshold }) }}</span>
+              </div>
+              <p v-if="task.paused && task.paused_until" class="text-xs text-amber-700">
+                {{ t('accounts.guard.pausedUntil', { time: formatDateTime(task.paused_until, { dateStyle: 'short', timeStyle: 'short' }) }) }}
+              </p>
+              <p v-if="task.last_failure_reason" class="break-all text-xs text-slate-500">
+                {{ t('accounts.guard.lastError', { reason: task.last_failure_reason }) }}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              :disabled="isResettingGuard || (!task.paused && task.consecutive_failures === 0)"
+              @click="handleResetGuard(task.task_name)"
+            >
+              {{ t('accounts.guard.resetTask') }}
+            </Button>
+          </li>
+        </ul>
+      </CardContent>
+    </Card>
+
+    <Card class="app-surface border-none">
+      <CardHeader class="flex flex-row items-start justify-between gap-4 space-y-0">
+        <div class="space-y-1.5">
+          <CardTitle>{{ t('accounts.list.title') }}</CardTitle>
+          <CardDescription>{{ t('accounts.list.description') }}</CardDescription>
+        </div>
+        <Button size="sm" variant="outline" class="shrink-0" :disabled="!accounts.length" @click="checkAllStatuses">{{ t('accounts.status.checkAll') }}</Button>
       </CardHeader>
       <CardContent>
         <div class="space-y-4 md:hidden">
@@ -183,8 +319,13 @@ onMounted(fetchAccounts)
                 <Button size="sm" variant="outline" @click="goCreateTask(account.name)">{{ t('accounts.list.createTask') }}</Button>
               </div>
               <p class="break-all text-sm text-slate-500">{{ account.path }}</p>
+              <div class="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" :class="statusClass(statuses[account.name])">{{ statusLabel(statuses[account.name]) }}</Badge>
+                <span v-if="statusHint(statuses[account.name])" class="break-all text-xs text-slate-500">{{ statusHint(statuses[account.name]) }}</span>
+              </div>
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" class="flex-1 min-w-[120px]" :disabled="statuses[account.name]?.loading" @click="checkStatus(account.name)">{{ t('accounts.status.check') }}</Button>
               <Button size="sm" variant="outline" class="flex-1 min-w-[120px]" @click="openEditDialog(account.name)">{{ t('accounts.list.update') }}</Button>
               <Button size="sm" variant="destructive" class="flex-1 min-w-[120px]" @click="openDeleteDialog(account.name)">{{ t('accounts.list.delete') }}</Button>
             </div>
@@ -197,21 +338,29 @@ onMounted(fetchAccounts)
               <TableRow>
                 <TableHead>{{ t('accounts.list.name') }}</TableHead>
                 <TableHead>{{ t('accounts.list.file') }}</TableHead>
+                <TableHead>{{ t('accounts.status.column') }}</TableHead>
                 <TableHead class="text-right">{{ t('accounts.list.actions') }}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow v-if="isLoading">
-                <TableCell colspan="3" class="h-20 text-center text-muted-foreground">{{ t('common.loading') }}</TableCell>
+                <TableCell colspan="4" class="h-20 text-center text-muted-foreground">{{ t('common.loading') }}</TableCell>
               </TableRow>
               <TableRow v-else-if="accounts.length === 0">
-                <TableCell colspan="3" class="h-20 text-center text-muted-foreground">{{ t('accounts.list.empty') }}</TableCell>
+                <TableCell colspan="4" class="h-20 text-center text-muted-foreground">{{ t('accounts.list.empty') }}</TableCell>
               </TableRow>
               <TableRow v-else v-for="account in accounts" :key="account.name">
                 <TableCell class="font-medium">{{ account.name }}</TableCell>
                 <TableCell class="text-sm text-gray-500">{{ account.path }}</TableCell>
+                <TableCell>
+                  <div class="space-y-1">
+                    <Badge variant="outline" :class="statusClass(statuses[account.name])">{{ statusLabel(statuses[account.name]) }}</Badge>
+                    <p v-if="statusHint(statuses[account.name])" class="max-w-[260px] break-all text-xs text-slate-500">{{ statusHint(statuses[account.name]) }}</p>
+                  </div>
+                </TableCell>
                 <TableCell class="text-right">
                   <div class="flex justify-end gap-2">
+                    <Button size="sm" variant="outline" :disabled="statuses[account.name]?.loading" @click="checkStatus(account.name)">{{ t('accounts.status.check') }}</Button>
                     <Button size="sm" variant="outline" @click="goCreateTask(account.name)">{{ t('accounts.list.createTask') }}</Button>
                     <Button size="sm" variant="outline" @click="openEditDialog(account.name)">{{ t('accounts.list.update') }}</Button>
                     <Button size="sm" variant="destructive" @click="openDeleteDialog(account.name)">{{ t('accounts.list.delete') }}</Button>
