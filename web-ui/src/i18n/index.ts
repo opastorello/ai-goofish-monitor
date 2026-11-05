@@ -4,6 +4,7 @@ import zhCN from '@/i18n/messages/zh-CN'
 import enUS from '@/i18n/messages/en-US'
 import ptBR from '@/i18n/messages/pt-BR'
 import { BACKEND_MESSAGE_RULES } from '@/i18n/backendMessages'
+import { LOG_LINE_RULES } from '@/i18n/logLines'
 
 export type AppLocale = 'zh-CN' | 'en-US' | 'pt-BR'
 
@@ -63,6 +64,37 @@ export function translateBackendMessage(text: string | null | undefined): string
     if (match) return t(`backend.${rule.key}`, { ...(match.groups ?? {}) })
   }
   return text
+}
+
+const CJK_RE = /[\u4e00-\u9fff]/
+const LOG_PREFIX_RE = /^(\s*(?:\[ ?\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s*)?)(.*)$/
+const logLineCache = new Map<string, string>()
+
+function translateLogLine(line: string): string {
+  if (!CJK_RE.test(line)) return line
+  const key = `${i18n.global.locale.value}\u0000${line}`
+  const cached = logLineCache.get(key)
+  if (cached !== undefined) return cached
+  let result = line
+  const parts = LOG_PREFIX_RE.exec(line)
+  if (parts) {
+    for (const rule of LOG_LINE_RULES) {
+      const match = rule.re.exec(parts[2] ?? '')
+      if (match) {
+        result = (parts[1] ?? '') + t(`logLines.${rule.key}`, { ...(match.groups ?? {}) })
+        break
+      }
+    }
+  }
+  if (logLineCache.size > 5000) logLineCache.clear()
+  logLineCache.set(key, result)
+  return result
+}
+
+// Translates scraper log lines for display only; the log files themselves are not modified.
+export function translateLogText(text: string | null | undefined): string {
+  if (!text) return text ?? ''
+  return text.split('\n').map(translateLogLine).join('\n')
 }
 
 export function formatNumber(value: number, options?: Intl.NumberFormatOptions) {

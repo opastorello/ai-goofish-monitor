@@ -1,4 +1,5 @@
 import zhCNBackend from '@/i18n/messages/zh-CN-backend'
+import zhCNLogLines from '@/i18n/messages/zh-CN-loglines'
 import zhCNExtra from '@/i18n/messages/zh-CN-extra'
 
 const zhCN = {
@@ -309,6 +310,7 @@ const zhCN = {
   },
   ...zhCNExtra,
   ...zhCNBackend,
+  ...zhCNLogLines,
 }
 
 export default zhCN

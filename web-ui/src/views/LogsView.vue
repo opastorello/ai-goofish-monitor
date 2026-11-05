@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { translateLogText } from '@/i18n'
 import { useLogs } from '@/composables/useLogs'
 import { useTasks } from '@/composables/useTasks'
 import { Button } from '@/components/ui/button'
@@ -11,9 +12,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from '@/components/ui/toast'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { tasks } = useTasks()
 const { logs, isAutoRefresh, clearLogs, toggleAutoRefresh, fetchLogs, setTaskId, loadLatest, loadPrevious, isFetchingHistory, hasMoreHistory } = useLogs()
+// Re-translate when the locale changes; the raw log text is left untouched.
+const displayedLogs = computed(() => (locale.value, translateLogText(logs.value)))
+
 const logContainer = ref<HTMLElement | null>(null)
 const autoScroll = ref(true)
 const isClearDialogOpen = ref(false)
@@ -151,7 +155,7 @@ async function handleClearLogs() {
           ref="logContainer"
           @scroll="handleScroll"
           class="absolute inset-0 p-4 bg-[#030712] text-[#f3f4f6] font-mono text-sm overflow-auto whitespace-pre-wrap break-all"
-        >{{ logs }}</pre>
+        >{{ displayedLogs }}</pre>
       </CardContent>
     </Card>
 
