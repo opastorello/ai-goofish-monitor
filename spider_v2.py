@@ -7,6 +7,7 @@ import signal
 import contextlib
 import re
 
+from src.ai_output_language import apply_output_language
 from src.config import STATE_FILE
 from src.infrastructure.persistence.sqlite_task_repository import SqliteTaskRepository
 from src.scraper import scrape_xianyu
@@ -121,6 +122,10 @@ async def main():
                 
                 # 动态组合成最终的Prompt
                 task['ai_prompt_text'] = base_prompt.replace("{{CRITERIA_SECTION}}", criteria_text)
+                # 让 AI 以所选语言撰写 reason 等自由文本（默认中文，不改变提示词）
+                task['ai_prompt_text'] = apply_output_language(
+                    task['ai_prompt_text'], os.getenv("AI_OUTPUT_LANGUAGE")
+                )
                 
                 # 验证生成的prompt是否有效
                 if len(task['ai_prompt_text']) < 100:

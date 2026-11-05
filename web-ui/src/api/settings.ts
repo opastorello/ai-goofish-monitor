@@ -62,6 +62,7 @@ export interface AiSettings {
   OPENAI_BASE_URL?: string
   OPENAI_MODEL_NAME?: string
   PROXY_URL?: string
+  AI_OUTPUT_LANGUAGE?: string
 }
 
 export interface RotationSettings {

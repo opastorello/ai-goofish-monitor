@@ -266,6 +266,8 @@ const zhCN = {
       keyPlaceholder: '留空表示不修改',
       keyConfigured: '已配置，为安全起见不回显。',
       keyMissing: '未配置，为安全起见不回显。',
+      outputLanguage: "AI 回复语言",
+      outputLanguageHint: "AI 分析结果里 reason 等文字所用的语言。仅对之后的新分析生效，已保存的结果不会改变。",
       modelName: '模型名称',
       proxy: '代理地址 (可选)',
       loading: '正在加载 AI 配置...',

@@ -266,6 +266,8 @@ const enUS = {
       keyPlaceholder: 'Leave blank to keep current value',
       keyConfigured: 'Configured and intentionally not echoed back.',
       keyMissing: 'Not configured and intentionally not echoed back.',
+      outputLanguage: "AI response language",
+      outputLanguageHint: "Language of the reason and other text written by the AI. Only new analyses are affected; saved results keep their language.",
       modelName: 'Model Name',
       proxy: 'Proxy URL (optional)',
       loading: 'Loading AI settings...',

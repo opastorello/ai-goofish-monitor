@@ -266,6 +266,8 @@ const ptBR = {
       keyPlaceholder: 'Deixe em branco para manter o valor atual',
       keyConfigured: 'Configurada e intencionalmente não exibida novamente.',
       keyMissing: 'Não configurada e intencionalmente não exibida novamente.',
+      outputLanguage: "Idioma das respostas da IA",
+      outputLanguageHint: "Idioma do motivo e dos demais textos escritos pela IA. Vale só para as próximas análises; os resultados já salvos não mudam.",
       modelName: 'Nome do modelo',
       proxy: 'URL do proxy (opcional)',
       loading: 'Carregando configurações de IA...',

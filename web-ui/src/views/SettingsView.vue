@@ -313,6 +313,20 @@ watch(selectedPrompt, async (value) => {
               </p>
             </div>
             <div class="grid gap-2">
+              <Label>{{ t('settings.ai.outputLanguage') }}</Label>
+              <Select v-model="aiSettings.AI_OUTPUT_LANGUAGE">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('settings.ai.outputLanguage')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="zh-CN">中文</SelectItem>
+                  <SelectItem value="en-US">English</SelectItem>
+                  <SelectItem value="pt-BR">Português</SelectItem>
+                </SelectContent>
+              </Select>
+              <p class="text-xs text-gray-500">{{ t('settings.ai.outputLanguageHint') }}</p>
+            </div>
+            <div class="grid gap-2">
               <Label>{{ t('settings.ai.proxy') }}</Label>
               <Input v-model="aiSettings.PROXY_URL" placeholder="http://127.0.0.1:7890" />
             </div>

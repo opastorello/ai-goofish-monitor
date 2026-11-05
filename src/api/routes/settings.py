@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from src.ai_output_language import normalize_output_language
 from src.api.dependencies import get_process_service
 from src.infrastructure.config.env_manager import env_manager
 from src.infrastructure.config.settings import (
@@ -106,6 +107,7 @@ class AISettingsModel(BaseModel):
     OPENAI_MODEL_NAME: Optional[str] = None
     SKIP_AI_ANALYSIS: Optional[bool] = None
     PROXY_URL: Optional[str] = None
+    AI_OUTPUT_LANGUAGE: Optional[str] = None
 
 
 class RotationSettingsModel(BaseModel):
@@ -261,6 +263,9 @@ async def get_ai_settings():
         "OPENAI_MODEL_NAME": env_manager.get_value("OPENAI_MODEL_NAME", ""),
         "SKIP_AI_ANALYSIS": env_manager.get_value("SKIP_AI_ANALYSIS", "false").lower() == "true",
         "PROXY_URL": env_manager.get_value("PROXY_URL", ""),
+        "AI_OUTPUT_LANGUAGE": normalize_output_language(
+            env_manager.get_value("AI_OUTPUT_LANGUAGE", "")
+        ),
     }
 
 
@@ -277,6 +282,8 @@ async def update_ai_settings(settings: AISettingsModel):
         updates["SKIP_AI_ANALYSIS"] = str(settings.SKIP_AI_ANALYSIS).lower()
     if settings.PROXY_URL is not None:
         updates["PROXY_URL"] = settings.PROXY_URL
+    if settings.AI_OUTPUT_LANGUAGE is not None:
+        updates["AI_OUTPUT_LANGUAGE"] = normalize_output_language(settings.AI_OUTPUT_LANGUAGE)
 
     success = env_manager.update_values(updates)
     if not success:
