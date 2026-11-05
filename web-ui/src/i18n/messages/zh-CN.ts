@@ -1,3 +1,4 @@
+import zhCNBackend from '@/i18n/messages/zh-CN-backend'
 import zhCNExtra from '@/i18n/messages/zh-CN-extra'
 
 const zhCN = {
@@ -294,6 +295,7 @@ const zhCN = {
     },
   },
   ...zhCNExtra,
+  ...zhCNBackend,
 }
 
 export default zhCN

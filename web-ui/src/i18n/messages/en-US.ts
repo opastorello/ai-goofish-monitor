@@ -1,3 +1,4 @@
+import enUSBackend from '@/i18n/messages/en-US-backend'
 import enUSExtra from '@/i18n/messages/en-US-extra'
 
 const enUS = {
@@ -294,6 +295,7 @@ const enUS = {
     },
   },
   ...enUSExtra,
+  ...enUSBackend,
 }
 
 export default enUS

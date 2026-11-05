@@ -1,4 +1,5 @@
 import { useAuth } from '@/composables/useAuth'
+import { translateBackendMessage } from '@/i18n'
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
@@ -40,7 +41,11 @@ export async function http(url: string, options: FetchOptions = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`)
+    throw new Error(
+      typeof errorData.detail === 'string'
+        ? translateBackendMessage(errorData.detail)
+        : errorData.detail || `HTTP error! status: ${response.status}`,
+    )
   }
 
   // Handle 204 No Content

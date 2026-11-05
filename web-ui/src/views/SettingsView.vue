@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { translateBackendMessage } from '@/i18n'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -139,7 +140,7 @@ async function handleSavePrompt() {
   isPromptSaving.value = true
   try {
     const res = await updatePrompt(selectedPrompt.value, promptContent.value)
-    notifySuccess(t('settings.prompts.saveSuccess'), res.message)
+    notifySuccess(t('settings.prompts.saveSuccess'), translateBackendMessage(res.message))
   } catch (e) {
     notifyError(t('settings.prompts.saveFailed'), (e as Error).message)
   } finally {

@@ -3,6 +3,7 @@ import { createI18n, useI18n } from 'vue-i18n'
 import zhCN from '@/i18n/messages/zh-CN'
 import enUS from '@/i18n/messages/en-US'
 import ptBR from '@/i18n/messages/pt-BR'
+import { BACKEND_MESSAGE_RULES } from '@/i18n/backendMessages'
 
 export type AppLocale = 'zh-CN' | 'en-US' | 'pt-BR'
 
@@ -53,6 +54,15 @@ export function useLocale() {
 
 export function t(key: string, params?: Record<string, unknown>) {
   return params ? i18n.global.t(key, params) : i18n.global.t(key)
+}
+
+export function translateBackendMessage(text: string | null | undefined): string {
+  if (!text) return text ?? ''
+  for (const rule of BACKEND_MESSAGE_RULES) {
+    const match = rule.re.exec(text)
+    if (match) return t(`backend.${rule.key}`, { ...(match.groups ?? {}) })
+  }
+  return text
 }
 
 export function formatNumber(value: number, options?: Intl.NumberFormatOptions) {

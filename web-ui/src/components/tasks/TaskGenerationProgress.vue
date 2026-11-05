@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { translateBackendMessage } from '@/i18n'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Badge } from '@/components/ui/badge'
@@ -45,7 +46,7 @@ function resolveStepTextClass(step: TaskGenerationStep) {
           {{ job.task_name }}
         </p>
         <p class="text-sm text-slate-600">
-          {{ job.message }}
+          {{ translateBackendMessage(job.message) }}
         </p>
       </div>
       <Badge :variant="statusMeta.variant">
@@ -65,14 +66,14 @@ function resolveStepTextClass(step: TaskGenerationStep) {
         />
         <div class="min-w-0 space-y-1">
           <p class="text-sm font-medium" :class="resolveStepTextClass(step)">
-            {{ step.label }}
+            {{ translateBackendMessage(step.label) }}
           </p>
           <p
             v-if="step.message"
             class="text-xs"
             :class="step.status === 'failed' ? 'text-red-500' : 'text-slate-500'"
           >
-            {{ step.message }}
+            {{ translateBackendMessage(step.message) }}
           </p>
         </div>
       </div>

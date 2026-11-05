@@ -1,3 +1,4 @@
+import ptBRBackend from '@/i18n/messages/pt-BR-backend'
 import ptBRExtra from '@/i18n/messages/pt-BR-extra'
 
 const ptBR = {
@@ -294,6 +295,7 @@ const ptBR = {
     },
   },
   ...ptBRExtra,
+  ...ptBRBackend,
 }
 
 export default ptBR

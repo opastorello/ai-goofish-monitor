@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { translateBackendMessage } from '@/i18n'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { BellRing, Radio, ShieldCheck, Send, TestTube2, Trash2, Webhook } from 'lucide-vue-next'
@@ -316,7 +317,7 @@ function resolveChannelBadge(channel: ChannelKey) {
 
       <div v-for="channel in ['ntfy', 'pushplus', 'bark', 'gotify', 'wecom', 'telegram', 'webhook']" :key="channel">
         <div v-if="testResults[channel]" class="rounded-2xl border px-4 py-3 text-sm" :class="resultClass(channel as ChannelKey)">
-          {{ testResults[channel].label }}：{{ testResults[channel].message }}
+          {{ testResults[channel].label }}：{{ translateBackendMessage(testResults[channel].message) }}
         </div>
       </div>
     </div>

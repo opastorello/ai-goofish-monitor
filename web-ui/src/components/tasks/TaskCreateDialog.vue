@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { translateBackendMessage } from '@/i18n'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -103,7 +104,7 @@ watch(
       isSubmitting.value = false
       toast({
         title: t('tasks.toasts.createFailed'),
-        description: activeJob.value?.error || activeJob.value?.message,
+        description: translateBackendMessage(activeJob.value?.error || activeJob.value?.message),
         variant: 'destructive',
       })
     }
