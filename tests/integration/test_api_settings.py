@@ -17,6 +17,7 @@ _SETTINGS_ENV_KEYS = [
     "PROXY_POOL",
     "PROXY_ROTATION_RETRY_LIMIT",
     "PROXY_BLACKLIST_TTL",
+    "AI_OUTPUT_LANGUAGE",
     "OPENAI_API_KEY",
     "OPENAI_BASE_URL",
     "OPENAI_MODEL_NAME",
@@ -338,6 +339,7 @@ def test_ai_settings_fall_back_to_runtime_environment_when_env_file_missing(tmp_
         "OPENAI_MODEL_NAME": "runtime-model",
         "SKIP_AI_ANALYSIS": False,
         "PROXY_URL": "http://127.0.0.1:7890",
+        "AI_OUTPUT_LANGUAGE": "zh-CN",
     }
 
     status_response = client.get("/api/settings/status")
@@ -437,3 +439,17 @@ def test_ai_test_endpoint_falls_back_to_responses_when_chat_completions_api_404(
     assert request_history[0][1]["messages"][0]["content"] == settings.AI_TEST_PROMPT
     assert request_history[1][0] == "responses"
     assert request_history[1][1]["input"][0]["content"][0]["text"] == settings.AI_TEST_PROMPT
+
+
+def test_ai_output_language_is_saved_and_unknown_values_fall_back(tmp_path, monkeypatch):
+    _clear_settings_env(monkeypatch)
+    env_file = tmp_path / ".env"
+    env_file.write_text("OPENAI_BASE_URL=https://x.example.com/v1\n", encoding="utf-8")
+    monkeypatch.setattr(env_manager, "env_file", env_file)
+    client = _build_settings_client()
+
+    assert client.put("/api/settings/ai", json={"AI_OUTPUT_LANGUAGE": "pt-BR"}).status_code == 200
+    assert client.get("/api/settings/ai").json()["AI_OUTPUT_LANGUAGE"] == "pt-BR"
+
+    assert client.put("/api/settings/ai", json={"AI_OUTPUT_LANGUAGE": "fr-FR"}).status_code == 200
+    assert client.get("/api/settings/ai").json()["AI_OUTPUT_LANGUAGE"] == "zh-CN"
