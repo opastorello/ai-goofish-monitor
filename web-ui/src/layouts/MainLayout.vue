@@ -31,7 +31,7 @@ const { t } = useI18n()
       <div v-if="isMobileNavOpen" class="fixed inset-0 z-[90] md:hidden">
         <button
           type="button"
-          class="absolute inset-0 bg-slate-950/25 backdrop-blur-[2px]"
+          class="absolute inset-0 bg-slate-950/25 dark:bg-black/50 backdrop-blur-[2px]"
           :aria-label="t('common.close')"
           @click="closeMobileNav"
         />

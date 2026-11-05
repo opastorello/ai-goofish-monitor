@@ -150,7 +150,7 @@ async function handleClearLogs() {
         <pre
           ref="logContainer"
           @scroll="handleScroll"
-          class="absolute inset-0 p-4 bg-gray-950 text-gray-100 font-mono text-sm overflow-auto whitespace-pre-wrap break-all"
+          class="absolute inset-0 p-4 bg-[#030712] text-[#f3f4f6] font-mono text-sm overflow-auto whitespace-pre-wrap break-all"
         >{{ logs }}</pre>
       </CardContent>
     </Card>
