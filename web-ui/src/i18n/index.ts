@@ -70,6 +70,14 @@ const CJK_RE = /[\u4e00-\u9fff]/
 const LOG_PREFIX_RE = /^(\s*(?:\[ ?\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]\s*)?)(.*)$/
 const logLineCache = new Map<string, string>()
 
+// Values the scraper prints inside a log line (page labels) that also need translating.
+function translateLogParam(name: string, value: string): string {
+  if (name !== 'page') return value
+  if (value === '店铺') return t('logLines.paramStore')
+  const page = /^第 (\d+) 页$/.exec(value)
+  return page ? t('logLines.paramPage', { n: page[1] ?? '' }) : value
+}
+
 function translateLogLine(line: string): string {
   if (!CJK_RE.test(line)) return line
   const key = `${i18n.global.locale.value}\u0000${line}`
@@ -81,7 +89,10 @@ function translateLogLine(line: string): string {
     for (const rule of LOG_LINE_RULES) {
       const match = rule.re.exec(parts[2] ?? '')
       if (match) {
-        result = (parts[1] ?? '') + t(`logLines.${rule.key}`, { ...(match.groups ?? {}) })
+        const params = Object.fromEntries(
+          Object.entries(match.groups ?? {}).map(([name, value]) => [name, translateLogParam(name, value)]),
+        )
+        result = (parts[1] ?? '') + t(`logLines.${rule.key}`, params)
         break
       }
     }

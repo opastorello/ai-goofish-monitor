@@ -14,6 +14,7 @@ from playwright.async_api import (
     async_playwright,
 )
 
+from src.human_verification import wait_for_human_verification
 from src.title_triage import triage_items
 from src.account_guard import AccountGuard, account_key
 from src.seller_scraper import collect_seller_cards, filter_seller_items, parse_seller_id
@@ -548,6 +549,11 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
     item_cap = _positive_int(task_config.get("max_items_per_run"))
     use_title_triage = bool(task_config.get("title_triage")) and decision_mode == "ai" and not SKIP_AI_ANALYSIS
     run_item_limit = min((n for n in (debug_limit, item_cap) if n and n > 0), default=0)
+    # 有窗口运行时遇到滑动验证：等人在浏览器里完成，并把新的登录态（含 x5sec）存回账号文件
+    try:
+        human_verify_wait = 0 if RUN_HEADLESS else max(0, int(os.getenv("HUMAN_VERIFY_WAIT_SECONDS", "300")))
+    except ValueError:
+        human_verify_wait = 0 if RUN_HEADLESS else 300
     seller_min_price = _price_bound(task_config.get("min_price"))
     seller_max_price = _price_bound(task_config.get("max_price"))
 
@@ -790,6 +796,22 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                             ret_string = str(
                                 await safe_get(detail_json, "ret", default=[])
                             )
+                            if "FAIL_SYS_USER_VALIDATE" in ret_string and human_verify_wait > 0:
+                                log_time(
+                                    f"检测到闲鱼验证 (FAIL_SYS_USER_VALIDATE)。请在已打开的浏览器窗口里完成滑动验证，最多等待 {human_verify_wait} 秒…"
+                                )
+                                if await wait_for_human_verification(
+                                    detail_page,
+                                    context,
+                                    state_file,
+                                    timeout_seconds=human_verify_wait,
+                                    detail_url_pattern=DETAIL_API_URL_PATTERN,
+                                    log=log_time,
+                                ):
+                                    continue
+                                log_time(
+                                    f"等待验证超时（{human_verify_wait} 秒），按风控处理并结束本次运行。"
+                                )
                             if "FAIL_SYS_USER_VALIDATE" in ret_string:
                                 print(
                                     "\n==================== CRITICAL BLOCK DETECTED ===================="
