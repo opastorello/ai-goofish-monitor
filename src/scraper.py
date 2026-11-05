@@ -1181,6 +1181,9 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                                         "----------------------------------------------------"
                                     )
 
+                        except RiskControlError:
+                            # 触发风控后必须立即终止，不能继续逐个请求商品详情
+                            raise
                         except PlaywrightTimeoutError:
                             print(f"   错误: 访问商品详情页或等待API响应超时。")
                         except Exception as e:
