@@ -171,6 +171,13 @@ async def serve_spa(request: Request, full_path: str):
     Catch-all 路由，将所有非 API 请求重定向到 index.html
     这样可以支持 Vue Router 的 HTML5 History 模式
     """
+    # 先尝试提供 dist 根目录下的静态文件（如 favicon.svg），仅限 dist 目录内
+    if full_path:
+        dist_root = os.path.realpath("dist")
+        candidate = os.path.realpath(os.path.join(dist_root, full_path))
+        if candidate.startswith(dist_root + os.sep) and os.path.isfile(candidate):
+            return FileResponse(candidate)
+
     # 如果请求的是静态资源（如 favicon.ico），返回 404
     if full_path.endswith(('.ico', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.css', '.js', '.json')):
         return JSONResponse(status_code=404, content={"error": "资源未找到"})

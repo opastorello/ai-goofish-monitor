@@ -71,6 +71,7 @@ const ptBR = {
     openNotifications: 'Abrir configurações de notificação',
     openPrompts: 'Abrir gerenciador de prompts',
     searchUnavailable: 'A busca de tarefas só está disponível no painel...',
+    logout: "Sair",
     accountManagement: 'Gerenciamento de contas',
   },
   sidebar: {
@@ -89,6 +90,12 @@ const ptBR = {
     description: 'Informe suas credenciais de administrador para continuar',
     username: 'Usuário',
     password: 'Senha',
+    tagline: "Monitoramento inteligente do Goofish (闲鱼) com IA",
+    features: {
+      ai: { title: "Análise por IA", description: "Modelos multimodais avaliam fotos, preço e vendedor." },
+      tasks: { title: "Várias tarefas", description: "Busca por palavra-chave ou por loja, com agendamento." },
+      alerts: { title: "Alertas instantâneos", description: "Notificações por ntfy, Telegram, Bark e mais." },
+    },
     submit: 'Entrar',
     submitting: 'Entrando...',
     errors: {

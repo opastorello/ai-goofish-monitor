@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useI18n } from 'vue-i18n'
+import { BellRing, BrainCircuit, Layers, Zap } from 'lucide-vue-next'
 
 const username = ref('')
 const password = ref('')
@@ -19,6 +20,12 @@ const { login } = useAuth()
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
+
+const features = [
+  { icon: BrainCircuit, key: 'ai' },
+  { icon: Layers, key: 'tasks' },
+  { icon: BellRing, key: 'alerts' },
+] as const
 
 async function handleLogin() {
   if (!username.value || !password.value) {
@@ -55,7 +62,17 @@ async function handleLogin() {
       <ThemeToggle />
       <LocaleToggle />
     </div>
-    <Card class="app-surface relative z-10 w-full max-w-md border-none">
+    <div class="relative z-10 flex w-full max-w-md flex-col items-center gap-6 py-10">
+    <div class="flex flex-col items-center gap-3 text-center">
+      <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/30">
+        <Zap class="h-7 w-7 fill-white text-white" />
+      </div>
+      <h1 class="text-3xl font-black tracking-tighter text-slate-800">
+        AI <span class="text-primary">Xianyu</span> Hunter
+      </h1>
+      <p class="max-w-sm text-sm text-slate-500">{{ t('login.tagline') }}</p>
+    </div>
+    <Card class="app-surface w-full border-none">
       <CardHeader>
         <CardTitle class="text-2xl text-center">{{ t('login.title') }}</CardTitle>
         <CardDescription class="text-center">
@@ -66,11 +83,11 @@ async function handleLogin() {
         <CardContent class="grid gap-4">
           <div class="grid gap-2">
             <Label for="username">{{ t('login.username') }}</Label>
-            <Input id="username" type="text" v-model="username" placeholder="admin" required />
+            <Input id="username" type="text" v-model="username" autocomplete="username" placeholder="admin" required />
           </div>
           <div class="grid gap-2">
             <Label for="password">{{ t('login.password') }}</Label>
-            <Input id="password" type="password" v-model="password" required />
+            <Input id="password" type="password" v-model="password" autocomplete="current-password" required />
           </div>
           <div v-if="error" class="text-sm font-medium text-red-500" role="alert">
             {{ error }}
@@ -83,5 +100,17 @@ async function handleLogin() {
         </CardFooter>
       </form>
     </Card>
+    <ul class="grid w-full gap-3 sm:grid-cols-3">
+      <li
+        v-for="feature in features"
+        :key="feature.key"
+        class="flex flex-col items-center gap-1.5 rounded-xl border border-slate-200/70 bg-card/60 px-3 py-3 text-center backdrop-blur-sm"
+      >
+        <component :is="feature.icon" class="h-5 w-5 text-primary" aria-hidden="true" />
+        <span class="text-xs font-bold text-slate-700">{{ t(`login.features.${feature.key}.title`) }}</span>
+        <span class="text-[11px] leading-snug text-slate-500">{{ t(`login.features.${feature.key}.description`) }}</span>
+      </li>
+    </ul>
+    </div>
   </div>
 </template>

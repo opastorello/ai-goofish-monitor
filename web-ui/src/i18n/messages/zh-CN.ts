@@ -71,6 +71,7 @@ const zhCN = {
     openNotifications: '打开通知设置',
     openPrompts: '打开 Prompt 管理',
     searchUnavailable: '任务搜索仅在监控概览页可用...',
+    logout: "退出登录",
     accountManagement: '账号管理',
   },
   sidebar: {
@@ -89,6 +90,12 @@ const zhCN = {
     description: '请输入您的管理员凭证以继续',
     username: '用户名',
     password: '密码',
+    tagline: "基于 AI 的闲鱼智能监控",
+    features: {
+      ai: { title: "AI 分析", description: "多模态模型综合评估图片、价格和卖家。" },
+      tasks: { title: "多任务", description: "按关键词或指定店铺监控，支持定时执行。" },
+      alerts: { title: "即时通知", description: "通过 ntfy、Telegram、Bark 等渠道推送。" },
+    },
     submit: '登录',
     submitting: '登录中...',
     errors: {

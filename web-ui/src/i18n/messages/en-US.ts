@@ -71,6 +71,7 @@ const enUS = {
     openNotifications: 'Open notification settings',
     openPrompts: 'Open prompt manager',
     searchUnavailable: 'Task search is only available on the dashboard...',
+    logout: "Sign out",
     accountManagement: 'Account Management',
   },
   sidebar: {
@@ -89,6 +90,12 @@ const enUS = {
     description: 'Enter your admin credentials to continue',
     username: 'Username',
     password: 'Password',
+    tagline: "Smart Goofish (Xianyu) monitoring powered by AI",
+    features: {
+      ai: { title: "AI analysis", description: "Multimodal models weigh photos, price and seller." },
+      tasks: { title: "Multiple tasks", description: "Watch by keyword or by store, on a schedule." },
+      alerts: { title: "Instant alerts", description: "Notifications via ntfy, Telegram, Bark and more." },
+    },
     submit: 'Sign In',
     submitting: 'Signing in...',
     errors: {
