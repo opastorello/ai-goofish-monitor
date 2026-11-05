@@ -14,6 +14,7 @@ from playwright.async_api import (
     async_playwright,
 )
 
+from src.account_guard import AccountGuard, account_key
 from src.seller_scraper import collect_seller_cards, filter_seller_items, parse_seller_id
 from src.ai_handler import (
     download_all_images,
@@ -75,6 +76,7 @@ class LoginRequiredError(Exception):
 
 
 FAILURE_GUARD = FailureGuard()
+ACCOUNT_GUARD = AccountGuard()
 EDGE_DOCKER_WARNING_PRINTED = False
 
 
@@ -618,6 +620,7 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
         return picked or selected_proxy
 
     async def _run_scrape_attempt(state_file: str, proxy_server: Optional[str]) -> int:
+        account_guard_key = account_key(state_file)
         processed_item_count = 0
         stop_scraping = False
 
@@ -735,6 +738,13 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                     )
                     # --- 修改: 访问详情页前的等待时间，模拟用户在列表页上看了一会儿 ---
                     await random_sleep(2, 4)  # 原来是 (2, 4)
+
+                    wait_seconds = ACCOUNT_GUARD.acquire_detail_slot(account_guard_key)
+                    if wait_seconds > 0:
+                        log_time(
+                            f"账号请求限流：为避免触发风控，等待 {int(wait_seconds)} 秒后再打开下一个商品详情。"
+                        )
+                        await asyncio.sleep(wait_seconds)
 
                     detail_page = await context.new_page()
                     try:
@@ -1372,6 +1382,17 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
         if rotation_settings["proxy_enabled"] and proxy_server:
             print(f"IP 轮换：使用代理 {proxy_server}")
 
+        guard_key = account_key(state_path)
+        cooling = ACCOUNT_GUARD.cooldown_remaining(guard_key)
+        if cooling > 0:
+            # 冷却期内继续访问只会延长风控；这不算任务失败，也不会触碰闲鱼。
+            print(
+                f"账号 '{guard_key}' 处于风控冷却中，还需约 {int(cooling // 60) + 1} 分钟；"
+                "本次运行不会访问闲鱼。可在“账号管理”页手动解除。"
+            )
+            cleanup_task_images(task_config.get("task_name", "default"))
+            return processed_item_count
+
         try:
             processed_item_count += await _run_scrape_attempt(state_path, proxy_server)
             last_error = ""
@@ -1384,6 +1405,11 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
         except RiskControlError as e:
             last_error = str(e)
             print(f"检测到风控或验证触发: {e}")
+            ACCOUNT_GUARD.trip(guard_key, str(e))
+            print(
+                f"已触发账号 '{guard_key}' 的风控冷却（{int(ACCOUNT_GUARD.cooldown_seconds // 60)} 分钟）："
+                "冷却结束前不会再访问闲鱼。"
+            )
             # 风控验证通常不是简单轮换能解决的，避免无意义重试。
             break
         except Exception as e:

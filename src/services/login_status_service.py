@@ -111,6 +111,7 @@ def check_login_state(
         "unb": "",
         "tracknick": "",
         "reason": "",
+        "anti_bot_cookies": {"x5sec": False, "mtop_partitioned_detect": False},
         "h5_token_expires_at": None,
         "checked_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -123,6 +124,10 @@ def check_login_state(
         result.update(status="invalid_file", reason=f"could not read the login state file: {exc}")
         return result
 
+    result["anti_bot_cookies"] = {
+        "x5sec": "x5sec" in cookies,
+        "mtop_partitioned_detect": "mtop_partitioned_detect" in cookies,
+    }
     result["unb"] = cookies.get("unb", "")
     result["tracknick"] = cookies.get("tracknick", "")
     token, expires_at = _token_parts(cookies)

@@ -9,6 +9,7 @@ import aiofiles
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
+from src.account_guard import AccountGuard
 from src.failure_guard import FailureGuard
 from src.infrastructure.config.env_manager import env_manager
 from src.services.login_status_service import check_login_state
@@ -82,25 +83,33 @@ async def list_accounts():
 
 class GuardResetRequest(BaseModel):
     task_name: Optional[str] = None
+    account: Optional[str] = None
 
 
 @router.get("/guard", response_model=dict)
 async def get_guard_state():
     """风控保护（熔断）状态：各任务的连续失败数与暂停情况。"""
     guard = FailureGuard()
+    account_guard = AccountGuard()
     return {
         "threshold": guard.threshold,
         "pause_seconds": guard.pause_seconds,
         "tasks": await asyncio.to_thread(guard.snapshot),
+        "cooldown_seconds": int(account_guard.cooldown_seconds),
+        "accounts": await asyncio.to_thread(account_guard.snapshot),
     }
 
 
 @router.post("/guard/reset", response_model=dict)
 async def reset_guard(body: Optional[GuardResetRequest] = None):
     """手动解除风控熔断；不传 task_name 时重置全部任务。"""
-    guard = FailureGuard()
     task_name = body.task_name if body else None
-    count = await asyncio.to_thread(guard.reset, task_name)
+    account = body.account if body else None
+    count = 0
+    if account is None:
+        count += await asyncio.to_thread(FailureGuard().reset, task_name)
+    if task_name is None:
+        count += await asyncio.to_thread(AccountGuard().reset, account)
     return {"message": "风控保护已重置", "reset": count}
 
 

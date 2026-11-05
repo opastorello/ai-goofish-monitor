@@ -81,6 +81,11 @@ function statusClass(entry?: StatusEntry): string {
   return 'bg-rose-50 text-rose-700'
 }
 
+function missingAntiBotCookie(entry?: StatusEntry): boolean {
+  const cookies = entry?.result?.anti_bot_cookies
+  return Boolean(entry?.result?.valid && cookies && !cookies.x5sec)
+}
+
 function statusHint(entry?: StatusEntry): string {
   if (!entry) return ''
   if (entry.error) return entry.error
@@ -102,10 +107,10 @@ async function fetchGuard() {
   }
 }
 
-async function handleResetGuard(taskName?: string) {
+async function handleResetGuard(target: { taskName?: string; account?: string } = {}) {
   isResettingGuard.value = true
   try {
-    await resetGuard(taskName)
+    await resetGuard(target)
     toast({ title: t('accounts.guard.resetDone') })
     await fetchGuard()
   } catch (e) {
@@ -260,10 +265,34 @@ onMounted(() => {
         </div>
         <div class="flex shrink-0 gap-2">
           <Button size="sm" variant="outline" :disabled="isGuardLoading" @click="fetchGuard">{{ t('common.refresh') }}</Button>
-          <Button size="sm" :disabled="isResettingGuard || !guard?.tasks.length" @click="handleResetGuard()">{{ t('accounts.guard.resetAll') }}</Button>
+          <Button size="sm" :disabled="isResettingGuard || (!guard?.tasks.length && !guard?.accounts.length)" @click="handleResetGuard()">{{ t('accounts.guard.resetAll') }}</Button>
         </div>
       </CardHeader>
       <CardContent>
+        <div v-if="guard?.accounts.length" class="mb-4 space-y-2">
+          <h4 class="text-sm font-semibold text-slate-700">{{ t('accounts.guard.accountsTitle') }}</h4>
+          <ul class="divide-y divide-slate-100">
+            <li v-for="item in guard.accounts" :key="item.account" class="flex flex-wrap items-center justify-between gap-3 py-2">
+              <div class="min-w-0 space-y-0.5">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-sm font-semibold text-slate-800">{{ item.account }}</span>
+                  <Badge variant="outline" :class="item.cooling_down ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'">
+                    {{ item.cooling_down
+                      ? t('accounts.guard.accountCooling', { minutes: Math.ceil(item.cooldown_remaining_seconds / 60) })
+                      : t('accounts.guard.accountReady') }}
+                  </Badge>
+                </div>
+                <p v-if="item.cooling_down && item.reason" class="break-all text-xs text-slate-500">
+                  {{ t('accounts.guard.lastError', { reason: item.reason }) }}
+                </p>
+              </div>
+              <Button size="sm" variant="outline" :disabled="isResettingGuard || !item.cooling_down" @click="handleResetGuard({ account: item.account })">
+                {{ t('accounts.guard.resetAccount') }}
+              </Button>
+            </li>
+          </ul>
+        </div>
+        <p class="mb-3 text-xs text-slate-500">{{ t('accounts.guard.localOnlyHint', { minutes: Math.round((guard?.cooldown_seconds ?? 1800) / 60) }) }}</p>
         <p v-if="!guard?.tasks.length" class="py-4 text-center text-sm text-muted-foreground">{{ t('accounts.guard.empty') }}</p>
         <ul v-else class="divide-y divide-slate-100">
           <li v-for="task in guard.tasks" :key="task.task_name" class="flex flex-wrap items-center justify-between gap-3 py-3">
@@ -286,7 +315,7 @@ onMounted(() => {
               size="sm"
               variant="outline"
               :disabled="isResettingGuard || (!task.paused && task.consecutive_failures === 0)"
-              @click="handleResetGuard(task.task_name)"
+              @click="handleResetGuard({ taskName: task.task_name })"
             >
               {{ t('accounts.guard.resetTask') }}
             </Button>
@@ -323,6 +352,7 @@ onMounted(() => {
                 <Badge variant="outline" :class="statusClass(statuses[account.name])">{{ statusLabel(statuses[account.name]) }}</Badge>
                 <span v-if="statusHint(statuses[account.name])" class="break-all text-xs text-slate-500">{{ statusHint(statuses[account.name]) }}</span>
               </div>
+              <p v-if="missingAntiBotCookie(statuses[account.name])" class="text-xs text-amber-700">{{ t('accounts.status.noX5sec') }}</p>
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" class="flex-1 min-w-[120px]" :disabled="statuses[account.name]?.loading" @click="checkStatus(account.name)">{{ t('accounts.status.check') }}</Button>
@@ -356,6 +386,7 @@ onMounted(() => {
                   <div class="space-y-1">
                     <Badge variant="outline" :class="statusClass(statuses[account.name])">{{ statusLabel(statuses[account.name]) }}</Badge>
                     <p v-if="statusHint(statuses[account.name])" class="max-w-[260px] break-all text-xs text-slate-500">{{ statusHint(statuses[account.name]) }}</p>
+                    <p v-if="missingAntiBotCookie(statuses[account.name])" class="max-w-[260px] text-xs text-amber-700">{{ t('accounts.status.noX5sec') }}</p>
                   </div>
                 </TableCell>
                 <TableCell class="text-right">

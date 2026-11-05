@@ -45,6 +45,7 @@ export interface AccountStatus {
   unb: string
   tracknick: string
   reason: string
+  anti_bot_cookies: { x5sec: boolean; mtop_partitioned_detect: boolean }
   checked_at: string
 }
 
@@ -58,10 +59,20 @@ export interface GuardTask {
   last_success_at: string | null
 }
 
+export interface GuardAccount {
+  account: string
+  cooling_down: boolean
+  cooldown_remaining_seconds: number
+  reason: string | null
+  trips: number
+}
+
 export interface GuardState {
   threshold: number
   pause_seconds: number
   tasks: GuardTask[]
+  cooldown_seconds: number
+  accounts: GuardAccount[]
 }
 
 export async function getAccountStatus(name: string): Promise<AccountStatus> {
@@ -72,10 +83,13 @@ export async function getGuardState(): Promise<GuardState> {
   return await http('/api/accounts/guard')
 }
 
-export async function resetGuard(taskName?: string): Promise<{ message: string; reset: number }> {
+export async function resetGuard(target: { taskName?: string; account?: string } = {}): Promise<{ message: string; reset: number }> {
+  const body: Record<string, string> = {}
+  if (target.taskName) body.task_name = target.taskName
+  if (target.account) body.account = target.account
   return await http('/api/accounts/guard/reset', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(taskName ? { task_name: taskName } : {}),
+    body: JSON.stringify(body),
   })
 }

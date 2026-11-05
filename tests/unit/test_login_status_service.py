@@ -86,3 +86,23 @@ def test_missing_file_missing_token_and_network_error(tmp_path):
 
     result = check_login_state(_state(tmp_path), client=_client(boom))
     assert result["valid"] is False and result["status"] == "error"
+
+
+def test_status_reports_which_anti_bot_cookies_the_login_has(tmp_path):
+    def handler(request):
+        return httpx.Response(200, json={"ret": ["SUCCESS::ok"], "data": {}})
+
+    without = check_login_state(_state(tmp_path), client=_client(handler))
+    assert without["anti_bot_cookies"] == {"x5sec": False, "mtop_partitioned_detect": False}
+
+    with_cookies = _state(
+        tmp_path,
+        cookies=[
+            {"name": "_m_h5_tk", "value": "tok123_1893456000000"},
+            {"name": "x5sec", "value": "abc"},
+            {"name": "mtop_partitioned_detect", "value": "1"},
+        ],
+    )
+    result = check_login_state(with_cookies, client=_client(handler))
+    assert result["anti_bot_cookies"] == {"x5sec": True, "mtop_partitioned_detect": True}
+    assert "abc" not in json.dumps(result)
