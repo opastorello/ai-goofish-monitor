@@ -47,6 +47,9 @@ const ptBRExtra = {
       taskName: 'Nome da tarefa',
       taskNamePlaceholder: 'Exemplo: Câmera Sony A7M4',
       keyword: 'Palavra-chave de busca',
+      seller: "Loja / vendedor (opcional)",
+      sellerPlaceholder: "Link da loja ou ID do vendedor, ex.: https://www.goofish.com/personal?userId=391299371",
+      sellerHint: "Quando preenchido, só os anúncios dessa loja são monitorados e não há busca por palavra-chave; a palavra-chave vira um filtro de título (deixe vazia para analisar todos os anúncios). A faixa de preço continua valendo.",
       keywordPlaceholder: 'Exemplo: a7m4',
       decisionMode: 'Modo de decisão',
       decisionModePlaceholder: 'Selecione um modo de decisão',
@@ -124,6 +127,8 @@ const ptBRExtra = {
     },
     table: {
       headers: { status: 'Status', details: 'Detalhes da tarefa', crawl: 'Regras de coleta', mode: 'IA / Palavras-chave', schedule: 'Agendamento', actions: 'Ações' },
+      sellerBadge: "Loja",
+      sellerTitle: "Tarefa de loja: vendedor {id}",
       syncing: 'Sincronizando dados...',
       empty: 'Ainda não há tarefas de monitoramento',
       accountRotate: 'Rodízio',

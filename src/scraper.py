@@ -14,6 +14,7 @@ from playwright.async_api import (
     async_playwright,
 )
 
+from src.seller_scraper import collect_seller_cards, filter_seller_items, parse_seller_id
 from src.ai_handler import (
     download_all_images,
     get_ai_analysis,
@@ -525,6 +526,16 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
     if new_publish_option == "__none__":
         new_publish_option = ""
     region_filter = (task_config.get("region") or "").strip()
+    seller_id = parse_seller_id(task_config.get("seller_id"))
+
+    def _price_bound(raw_value) -> Optional[float]:
+        try:
+            return float(str(raw_value).strip()) if str(raw_value or "").strip() else None
+        except ValueError:
+            return None
+
+    seller_min_price = _price_bound(task_config.get("min_price"))
+    seller_max_price = _price_bound(task_config.get("max_price"))
 
     processed_links = set()
     history_run_id = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -684,6 +695,197 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                 );
             """)
 
+            async def process_basic_items(basic_items: list) -> None:
+                """Fetch details and submit each new item for analysis (shared by the search and seller flows)."""
+                nonlocal processed_item_count, stop_scraping
+
+                total_items_on_page = len(basic_items)
+                for i, item_data in enumerate(basic_items, 1):
+                    if debug_limit > 0 and processed_item_count >= debug_limit:
+                        log_time(
+                            f"已达到调试上限 ({debug_limit})，停止获取新商品。"
+                        )
+                        stop_scraping = True
+                        break
+
+                    unique_key = get_link_unique_key(item_data["商品链接"])
+                    if unique_key in processed_links:
+                        log_time(
+                            f"[页内进度 {i}/{total_items_on_page}] 商品 '{item_data['商品标题'][:20]}...' 已存在，跳过。"
+                        )
+                        continue
+
+                    log_time(
+                        f"[页内进度 {i}/{total_items_on_page}] 发现新商品，获取详情: {item_data['商品标题'][:30]}..."
+                    )
+                    # --- 修改: 访问详情页前的等待时间，模拟用户在列表页上看了一会儿 ---
+                    await random_sleep(2, 4)  # 原来是 (2, 4)
+
+                    detail_page = await context.new_page()
+                    try:
+                        async with detail_page.expect_response(
+                            lambda r: DETAIL_API_URL_PATTERN in r.url, timeout=25000
+                        ) as detail_info:
+                            await detail_page.goto(
+                                item_data["商品链接"],
+                                wait_until="domcontentloaded",
+                                timeout=25000,
+                            )
+
+                        detail_response = await detail_info.value
+                        if detail_response.ok:
+                            detail_json = await detail_response.json()
+
+                            ret_string = str(
+                                await safe_get(detail_json, "ret", default=[])
+                            )
+                            if "FAIL_SYS_USER_VALIDATE" in ret_string:
+                                print(
+                                    "\n==================== CRITICAL BLOCK DETECTED ===================="
+                                )
+                                print(
+                                    "检测到闲鱼反爬虫验证 (FAIL_SYS_USER_VALIDATE)，程序将终止。"
+                                )
+                                long_sleep_duration = random.randint(3, 60)
+                                print(
+                                    f"为避免账户风险，将执行一次长时间休眠 ({long_sleep_duration} 秒) 后再退出..."
+                                )
+                                await asyncio.sleep(long_sleep_duration)
+                                print("长时间休眠结束，现在将安全退出。")
+                                print(
+                                    "==================================================================="
+                                )
+                                raise RiskControlError("FAIL_SYS_USER_VALIDATE")
+
+                            # 解析商品详情数据并更新 item_data
+                            item_do = await safe_get(
+                                detail_json, "data", "itemDO", default={}
+                            )
+                            seller_do = await safe_get(
+                                detail_json, "data", "sellerDO", default={}
+                            )
+
+                            reg_days_raw = await safe_get(
+                                seller_do, "userRegDay", default=0
+                            )
+                            registration_duration_text = format_registration_days(
+                                reg_days_raw
+                            )
+
+                            # --- START: 新增代码块 ---
+
+                            # 1. 提取卖家的芝麻信用信息
+                            zhima_credit_text = await safe_get(
+                                seller_do, "zhimaLevelInfo", "levelName"
+                            )
+
+                            # 2. 提取该商品的完整图片列表
+                            image_infos = await safe_get(
+                                item_do, "imageInfos", default=[]
+                            )
+                            if image_infos:
+                                # 使用列表推导式获取所有有效的图片URL
+                                all_image_urls = [
+                                    img.get("url")
+                                    for img in image_infos
+                                    if img.get("url")
+                                ]
+                                if all_image_urls:
+                                    # 用新的字段存储图片列表，替换掉旧的单个链接
+                                    item_data["商品图片列表"] = all_image_urls
+                                    # (可选) 仍然保留主图链接，以防万一
+                                    item_data["商品主图链接"] = all_image_urls[0]
+
+                            # --- END: 新增代码块 ---
+                            item_data["“想要”人数"] = await safe_get(
+                                item_do,
+                                "wantCnt",
+                                default=item_data.get("“想要”人数", "NaN"),
+                            )
+                            item_data["浏览量"] = await safe_get(
+                                item_do, "browseCnt", default="-"
+                            )
+                            # ...[此处可添加更多从详情页解析出的商品信息]...
+
+                            user_id = await safe_get(seller_do, "sellerId")
+
+                            # 构建基础记录
+                            final_record = {
+                                "爬取时间": datetime.now().isoformat(),
+                                "搜索关键字": keyword,
+                                "任务名称": task_config.get(
+                                    "task_name", "Untitled Task"
+                                ),
+                                "商品信息": item_data,
+                                "卖家信息": {},
+                            }
+                            price_reference = build_market_reference(
+                                keyword=keyword,
+                                item=item_data,
+                                current_market_items=basic_items,
+                                historical_snapshots=historical_snapshots,
+                            )
+                            final_record["价格参考"] = price_reference
+                            final_record["price_insight"] = price_reference.get(
+                                "本商品价格位置", {}
+                            )
+
+                            analysis_dispatcher.submit(
+                                ItemAnalysisJob(
+                                    keyword=keyword,
+                                    task_name=task_config.get(
+                                        "task_name", "Untitled Task"
+                                    ),
+                                    decision_mode=decision_mode,
+                                    analyze_images=analyze_images,
+                                    prompt_text=ai_prompt_text,
+                                    keyword_rules=tuple(keyword_rules or []),
+                                    final_record=final_record,
+                                    seller_id=str(user_id) if user_id else None,
+                                    zhima_credit_text=zhima_credit_text,
+                                    registration_duration_text=registration_duration_text,
+                                )
+                            )
+
+                            processed_links.add(unique_key)
+                            processed_item_count += 1
+                            log_time(
+                                f"商品已提交后台分析。累计处理 {processed_item_count} 个新商品。"
+                            )
+
+                            # --- 修改: 增加单个商品处理后的主要延迟 ---
+                            log_time(
+                                "[反爬] 执行一次主要的随机延迟以模拟用户浏览间隔..."
+                            )
+                            await random_sleep(5, 10)
+                        else:
+                            print(
+                                f"   错误: 获取商品详情API响应失败，状态码: {detail_response.status}"
+                            )
+                            if AI_DEBUG_MODE:
+                                print(
+                                    f"--- [DETAIL DEBUG] FAILED RESPONSE from {item_data['商品链接']} ---"
+                                )
+                                try:
+                                    print(await detail_response.text())
+                                except Exception as e:
+                                    print(f"无法读取响应内容: {e}")
+                                print(
+                                    "----------------------------------------------------"
+                                )
+
+                    except RiskControlError:
+                        # 触发风控后必须立即终止，不能继续逐个请求商品详情
+                        raise
+                    except PlaywrightTimeoutError:
+                        print(f"   错误: 访问商品详情页或等待API响应超时。")
+                    except Exception as e:
+                        print(f"   错误: 处理商品详情时发生未知错误: {e}")
+                    finally:
+                        await detail_page.close()
+                        # --- 修改: 增加关闭页面后的短暂整理时间 ---
+                        await random_sleep(2, 4)  # 原来是 (1, 2.5)
+
             page = await context.new_page()
 
             try:
@@ -700,6 +902,24 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                 # 模拟随机滚动（移动设备的触摸滚动）
                 await page.evaluate("window.scrollBy(0, Math.random() * 500 + 200)")
                 await random_sleep(1, 2)
+
+                if seller_id:
+                    log_time(f"店铺模式：读取卖家 {seller_id} 的在售商品（跳过关键词搜索与搜索筛选）...")
+                    seller_cards, seller_name = await collect_seller_cards(
+                        page, seller_id, max_scrolls=max(1, int(max_pages or 1))
+                    )
+                    seller_items = filter_seller_items(
+                        seller_cards,
+                        keyword=keyword,
+                        seller_name=seller_name,
+                        min_price=seller_min_price,
+                        max_price=seller_max_price,
+                    )
+                    log_time(
+                        f"店铺 '{seller_name or seller_id}' 共读取 {len(seller_cards)} 件商品，符合条件 {len(seller_items)} 件。"
+                    )
+                    await process_basic_items(seller_items)
+                    return processed_item_count
 
                 log_time("步骤 1 - 导航到搜索结果页...")
                 # 使用 'q' 参数构建正确的搜索URL，并进行URL编码
@@ -1006,192 +1226,7 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                         )
                     )
 
-                    total_items_on_page = len(basic_items)
-                    for i, item_data in enumerate(basic_items, 1):
-                        if debug_limit > 0 and processed_item_count >= debug_limit:
-                            log_time(
-                                f"已达到调试上限 ({debug_limit})，停止获取新商品。"
-                            )
-                            stop_scraping = True
-                            break
-
-                        unique_key = get_link_unique_key(item_data["商品链接"])
-                        if unique_key in processed_links:
-                            log_time(
-                                f"[页内进度 {i}/{total_items_on_page}] 商品 '{item_data['商品标题'][:20]}...' 已存在，跳过。"
-                            )
-                            continue
-
-                        log_time(
-                            f"[页内进度 {i}/{total_items_on_page}] 发现新商品，获取详情: {item_data['商品标题'][:30]}..."
-                        )
-                        # --- 修改: 访问详情页前的等待时间，模拟用户在列表页上看了一会儿 ---
-                        await random_sleep(2, 4)  # 原来是 (2, 4)
-
-                        detail_page = await context.new_page()
-                        try:
-                            async with detail_page.expect_response(
-                                lambda r: DETAIL_API_URL_PATTERN in r.url, timeout=25000
-                            ) as detail_info:
-                                await detail_page.goto(
-                                    item_data["商品链接"],
-                                    wait_until="domcontentloaded",
-                                    timeout=25000,
-                                )
-
-                            detail_response = await detail_info.value
-                            if detail_response.ok:
-                                detail_json = await detail_response.json()
-
-                                ret_string = str(
-                                    await safe_get(detail_json, "ret", default=[])
-                                )
-                                if "FAIL_SYS_USER_VALIDATE" in ret_string:
-                                    print(
-                                        "\n==================== CRITICAL BLOCK DETECTED ===================="
-                                    )
-                                    print(
-                                        "检测到闲鱼反爬虫验证 (FAIL_SYS_USER_VALIDATE)，程序将终止。"
-                                    )
-                                    long_sleep_duration = random.randint(3, 60)
-                                    print(
-                                        f"为避免账户风险，将执行一次长时间休眠 ({long_sleep_duration} 秒) 后再退出..."
-                                    )
-                                    await asyncio.sleep(long_sleep_duration)
-                                    print("长时间休眠结束，现在将安全退出。")
-                                    print(
-                                        "==================================================================="
-                                    )
-                                    raise RiskControlError("FAIL_SYS_USER_VALIDATE")
-
-                                # 解析商品详情数据并更新 item_data
-                                item_do = await safe_get(
-                                    detail_json, "data", "itemDO", default={}
-                                )
-                                seller_do = await safe_get(
-                                    detail_json, "data", "sellerDO", default={}
-                                )
-
-                                reg_days_raw = await safe_get(
-                                    seller_do, "userRegDay", default=0
-                                )
-                                registration_duration_text = format_registration_days(
-                                    reg_days_raw
-                                )
-
-                                # --- START: 新增代码块 ---
-
-                                # 1. 提取卖家的芝麻信用信息
-                                zhima_credit_text = await safe_get(
-                                    seller_do, "zhimaLevelInfo", "levelName"
-                                )
-
-                                # 2. 提取该商品的完整图片列表
-                                image_infos = await safe_get(
-                                    item_do, "imageInfos", default=[]
-                                )
-                                if image_infos:
-                                    # 使用列表推导式获取所有有效的图片URL
-                                    all_image_urls = [
-                                        img.get("url")
-                                        for img in image_infos
-                                        if img.get("url")
-                                    ]
-                                    if all_image_urls:
-                                        # 用新的字段存储图片列表，替换掉旧的单个链接
-                                        item_data["商品图片列表"] = all_image_urls
-                                        # (可选) 仍然保留主图链接，以防万一
-                                        item_data["商品主图链接"] = all_image_urls[0]
-
-                                # --- END: 新增代码块 ---
-                                item_data["“想要”人数"] = await safe_get(
-                                    item_do,
-                                    "wantCnt",
-                                    default=item_data.get("“想要”人数", "NaN"),
-                                )
-                                item_data["浏览量"] = await safe_get(
-                                    item_do, "browseCnt", default="-"
-                                )
-                                # ...[此处可添加更多从详情页解析出的商品信息]...
-
-                                user_id = await safe_get(seller_do, "sellerId")
-
-                                # 构建基础记录
-                                final_record = {
-                                    "爬取时间": datetime.now().isoformat(),
-                                    "搜索关键字": keyword,
-                                    "任务名称": task_config.get(
-                                        "task_name", "Untitled Task"
-                                    ),
-                                    "商品信息": item_data,
-                                    "卖家信息": {},
-                                }
-                                price_reference = build_market_reference(
-                                    keyword=keyword,
-                                    item=item_data,
-                                    current_market_items=basic_items,
-                                    historical_snapshots=historical_snapshots,
-                                )
-                                final_record["价格参考"] = price_reference
-                                final_record["price_insight"] = price_reference.get(
-                                    "本商品价格位置", {}
-                                )
-
-                                analysis_dispatcher.submit(
-                                    ItemAnalysisJob(
-                                        keyword=keyword,
-                                        task_name=task_config.get(
-                                            "task_name", "Untitled Task"
-                                        ),
-                                        decision_mode=decision_mode,
-                                        analyze_images=analyze_images,
-                                        prompt_text=ai_prompt_text,
-                                        keyword_rules=tuple(keyword_rules or []),
-                                        final_record=final_record,
-                                        seller_id=str(user_id) if user_id else None,
-                                        zhima_credit_text=zhima_credit_text,
-                                        registration_duration_text=registration_duration_text,
-                                    )
-                                )
-
-                                processed_links.add(unique_key)
-                                processed_item_count += 1
-                                log_time(
-                                    f"商品已提交后台分析。累计处理 {processed_item_count} 个新商品。"
-                                )
-
-                                # --- 修改: 增加单个商品处理后的主要延迟 ---
-                                log_time(
-                                    "[反爬] 执行一次主要的随机延迟以模拟用户浏览间隔..."
-                                )
-                                await random_sleep(5, 10)
-                            else:
-                                print(
-                                    f"   错误: 获取商品详情API响应失败，状态码: {detail_response.status}"
-                                )
-                                if AI_DEBUG_MODE:
-                                    print(
-                                        f"--- [DETAIL DEBUG] FAILED RESPONSE from {item_data['商品链接']} ---"
-                                    )
-                                    try:
-                                        print(await detail_response.text())
-                                    except Exception as e:
-                                        print(f"无法读取响应内容: {e}")
-                                    print(
-                                        "----------------------------------------------------"
-                                    )
-
-                        except RiskControlError:
-                            # 触发风控后必须立即终止，不能继续逐个请求商品详情
-                            raise
-                        except PlaywrightTimeoutError:
-                            print(f"   错误: 访问商品详情页或等待API响应超时。")
-                        except Exception as e:
-                            print(f"   错误: 处理商品详情时发生未知错误: {e}")
-                        finally:
-                            await detail_page.close()
-                            # --- 修改: 增加关闭页面后的短暂整理时间 ---
-                            await random_sleep(2, 4)  # 原来是 (1, 2.5)
+                    await process_basic_items(basic_items)
 
                     # --- 新增: 在处理完一页所有商品后，翻页前，增加一个更长的“休息”时间 ---
                     if not stop_scraping and page_num < max_pages:

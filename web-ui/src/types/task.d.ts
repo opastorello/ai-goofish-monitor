@@ -20,6 +20,7 @@ export interface Task {
   free_shipping?: boolean;
   new_publish_option?: string | null;
   region?: string | null;
+  seller_id?: string | null;
   decision_mode: 'ai' | 'keyword';
   keyword_rules: string[];
   is_running: boolean;
@@ -71,6 +72,7 @@ export interface TaskGenerateRequest {
   free_shipping?: boolean;
   new_publish_option?: string | null;
   region?: string | null;
+  seller_id?: string | null;
   decision_mode?: 'ai' | 'keyword';
   keyword_rules?: string[];
 }

@@ -245,6 +245,7 @@ function handleSubmit() {
     submitData.new_publish_option = ''
   }
 
+  submitData.seller_id = typeof submitData.seller_id === 'string' ? submitData.seller_id.trim() : ''
   submitData.decision_mode = decisionMode
   submitData.account_strategy = currentAccountStrategy
   submitData.analyze_images = submitData.analyze_images !== false
@@ -267,6 +268,13 @@ function handleSubmit() {
       <div class="grid gap-2 sm:grid-cols-4 sm:items-center sm:gap-4">
         <Label for="keyword" class="sm:text-right">{{ t('tasks.form.keyword') }}</Label>
         <Input id="keyword" v-model="form.keyword" class="sm:col-span-3" :placeholder="t('tasks.form.keywordPlaceholder')" required />
+      </div>
+      <div class="grid gap-2 sm:grid-cols-4 sm:items-center sm:gap-4">
+        <Label for="seller-id" class="sm:text-right">{{ t('tasks.form.seller') }}</Label>
+        <div class="space-y-1 sm:col-span-3">
+          <Input id="seller-id" v-model="form.seller_id" :placeholder="t('tasks.form.sellerPlaceholder')" />
+          <p class="text-xs text-gray-500">{{ t('tasks.form.sellerHint') }}</p>
+        </div>
       </div>
       <div class="grid gap-2 sm:grid-cols-4 sm:items-center sm:gap-4">
         <Label class="sm:text-right">{{ t('tasks.form.decisionMode') }}</Label>

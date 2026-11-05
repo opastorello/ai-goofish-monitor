@@ -47,6 +47,9 @@ const zhCNExtra = {
       taskName: '任务名称',
       taskNamePlaceholder: '例如：索尼 A7M4 相机',
       keyword: '搜索关键词',
+      seller: "店铺 / 卖家（可选）",
+      sellerPlaceholder: "店铺链接或卖家ID，例如 https://www.goofish.com/personal?userId=391299371",
+      sellerHint: "填写后只监控该店铺的在售商品，不再做关键词搜索；关键词改为按商品标题过滤（留空则分析全部商品）。价格范围仍然生效。",
       keywordPlaceholder: '例如：a7m4',
       decisionMode: '判断模式',
       decisionModePlaceholder: '请选择判断模式',
@@ -124,6 +127,8 @@ const zhCNExtra = {
     },
     table: {
       headers: { status: '状态', details: '任务详情', crawl: '采集规则', mode: 'AI/关键配置', schedule: '触发规则', actions: '操作' },
+      sellerBadge: "店铺",
+      sellerTitle: "店铺任务：卖家 {id}",
       syncing: '数据同步中...',
       empty: '暂无监测任务',
       accountRotate: '轮换',

@@ -41,6 +41,7 @@ SCHEMA_STATEMENTS = (
         free_shipping INTEGER NOT NULL,
         new_publish_option TEXT,
         region TEXT,
+        seller_id TEXT,
         decision_mode TEXT NOT NULL,
         keyword_rules_json TEXT NOT NULL,
         is_running INTEGER NOT NULL
@@ -143,7 +144,15 @@ def init_schema(conn: sqlite3.Connection) -> None:
     for statement in SCHEMA_STATEMENTS:
         conn.execute(statement)
     _migrate_result_items_status(conn)
+    _migrate_tasks_seller_id(conn)
     conn.commit()
+
+
+def _migrate_tasks_seller_id(conn: sqlite3.Connection) -> None:
+    """为 tasks 表添加 seller_id 列（店铺任务，仅在缺失时执行）。"""
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()]
+    if "seller_id" not in cols:
+        conn.execute("ALTER TABLE tasks ADD COLUMN seller_id TEXT")
 
 
 def _migrate_result_items_status(conn: sqlite3.Connection) -> None:

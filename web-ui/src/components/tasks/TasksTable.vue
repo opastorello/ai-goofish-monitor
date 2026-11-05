@@ -343,17 +343,25 @@ const emit = defineEmits<{
             <!-- Column 2: Task Info -->
             <TableCell class="align-middle">
               <div class="flex flex-col gap-1.5 py-1">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span class="text-base font-black text-slate-800 tracking-tight group-hover:text-primary transition-colors">{{ task.task_name }}</span>
                   <Badge 
                     variant="outline" 
                     :class="[
-                      'h-4 px-1.5 text-[9px] font-black border-none tracking-tighter', 
+                      'h-4 shrink-0 whitespace-nowrap px-1.5 text-[9px] font-black border-none tracking-tighter', 
                       isKeywordMode(task) ? 'bg-blue-50 text-blue-500' : 'bg-emerald-50 text-emerald-600'
                     ]"
                   >
                     <component :is="isKeywordMode(task) ? Keyboard : BrainCircuit" class="w-2.5 h-2.5 mr-1" />
                     {{ isKeywordMode(task) ? 'KEYWORD' : 'AI ENGINE' }}
+                  </Badge>
+                  <Badge
+                    v-if="task.seller_id"
+                    variant="outline"
+                    class="h-4 shrink-0 whitespace-nowrap px-1.5 text-[9px] font-black border-none tracking-tighter bg-amber-50 text-amber-700"
+                    :title="t('tasks.table.sellerTitle', { id: task.seller_id })"
+                  >
+                    {{ t('tasks.table.sellerBadge') }}
                   </Badge>
                 </div>
                 

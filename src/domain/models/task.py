@@ -9,6 +9,7 @@ from typing import Any, List, Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from src.core.cron_utils import validate_cron_expression
+from src.domain.models.seller import parse_seller_id
 from src.services.account_strategy_service import (
     clean_account_state_file,
     normalize_account_strategy,
@@ -104,6 +105,18 @@ def _normalize_price_value(value):
     return value
 
 
+def _normalize_seller_id(value):
+    text = _normalize_optional_string(value.strip() if isinstance(value, str) else value)
+    if text is None:
+        return None
+    parsed = parse_seller_id(text)
+    if parsed is None:
+        raise ValueError(
+            "店铺链接或卖家ID无效：请填写 goofish.com/personal?userId=... 链接或纯数字卖家ID。"
+        )
+    return parsed
+
+
 class Task(BaseModel):
     """任务实体"""
 
@@ -127,6 +140,7 @@ class Task(BaseModel):
     free_shipping: bool = True
     new_publish_option: Optional[str] = None
     region: Optional[str] = None
+    seller_id: Optional[str] = None
     decision_mode: Literal["ai", "keyword"] = "ai"
     keyword_rules: List[str] = Field(default_factory=list)
     is_running: bool = False
@@ -165,7 +179,7 @@ class TaskCreate(BaseModel):
     keyword: str
     description: Optional[str] = ""
     analyze_images: bool = True
-    max_pages: int = 3
+    max_pages: int = Field(3, ge=1)
     personal_only: bool = True
     min_price: Optional[str] = None
     max_price: Optional[str] = None
@@ -177,8 +191,14 @@ class TaskCreate(BaseModel):
     free_shipping: bool = True
     new_publish_option: Optional[str] = None
     region: Optional[str] = None
+    seller_id: Optional[str] = None
     decision_mode: Literal["ai", "keyword"] = "ai"
     keyword_rules: List[str] = Field(default_factory=list)
+
+    @field_validator("seller_id", mode="before")
+    @classmethod
+    def normalize_seller_id(cls, value):
+        return _normalize_seller_id(value)
 
     @model_validator(mode="before")
     @classmethod
@@ -232,7 +252,7 @@ class TaskUpdate(BaseModel):
     keyword: Optional[str] = None
     description: Optional[str] = None
     analyze_images: Optional[bool] = None
-    max_pages: Optional[int] = None
+    max_pages: Optional[int] = Field(None, ge=1)
     personal_only: Optional[bool] = None
     min_price: Optional[str] = None
     max_price: Optional[str] = None
@@ -244,9 +264,15 @@ class TaskUpdate(BaseModel):
     free_shipping: Optional[bool] = None
     new_publish_option: Optional[str] = None
     region: Optional[str] = None
+    seller_id: Optional[str] = None
     decision_mode: Optional[Literal["ai", "keyword"]] = None
     keyword_rules: Optional[List[str]] = None
     is_running: Optional[bool] = None
+
+    @field_validator("seller_id", mode="before")
+    @classmethod
+    def normalize_seller_id(cls, value):
+        return _normalize_seller_id(value)
 
     @model_validator(mode="before")
     @classmethod
@@ -301,15 +327,21 @@ class TaskGenerateRequest(BaseModel):
     personal_only: bool = True
     min_price: Optional[str] = None
     max_price: Optional[str] = None
-    max_pages: int = 3
+    max_pages: int = Field(3, ge=1)
     cron: Optional[str] = None
     account_state_file: Optional[str] = None
     account_strategy: Literal["auto", "fixed", "rotate"] = "auto"
     free_shipping: bool = True
     new_publish_option: Optional[str] = None
     region: Optional[str] = None
+    seller_id: Optional[str] = None
     decision_mode: Literal["ai", "keyword"] = "ai"
     keyword_rules: List[str] = Field(default_factory=list)
+
+    @field_validator("seller_id", mode="before")
+    @classmethod
+    def normalize_seller_id(cls, value):
+        return _normalize_seller_id(value)
 
     @model_validator(mode="before")
     @classmethod

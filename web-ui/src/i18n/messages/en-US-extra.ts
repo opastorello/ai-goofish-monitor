@@ -47,6 +47,9 @@ const enUSExtra = {
       taskName: 'Task Name',
       taskNamePlaceholder: 'Example: Sony A7M4 Camera',
       keyword: 'Search Keyword',
+      seller: "Store / seller (optional)",
+      sellerPlaceholder: "Store link or seller ID, e.g. https://www.goofish.com/personal?userId=391299371",
+      sellerHint: "When set, only that store's listings are monitored and no keyword search runs; the keyword becomes a title filter (leave it empty to analyze every listing). The price range still applies.",
       keywordPlaceholder: 'Example: a7m4',
       decisionMode: 'Decision Mode',
       decisionModePlaceholder: 'Select a decision mode',
@@ -124,6 +127,8 @@ const enUSExtra = {
     },
     table: {
       headers: { status: 'Status', details: 'Task Details', crawl: 'Crawl Rules', mode: 'AI / Keyword', schedule: 'Schedule', actions: 'Actions' },
+      sellerBadge: "Store",
+      sellerTitle: "Store task: seller {id}",
       syncing: 'Syncing data...',
       empty: 'No monitoring tasks yet',
       accountRotate: 'Rotate',
