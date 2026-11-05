@@ -2,12 +2,13 @@ import { computed, watch } from 'vue'
 import { createI18n, useI18n } from 'vue-i18n'
 import zhCN from '@/i18n/messages/zh-CN'
 import enUS from '@/i18n/messages/en-US'
+import ptBR from '@/i18n/messages/pt-BR'
 
-export type AppLocale = 'zh-CN' | 'en-US'
+export type AppLocale = 'zh-CN' | 'en-US' | 'pt-BR'
 
 const LOCALE_STORAGE_KEY = 'app_locale'
 const DEFAULT_LOCALE: AppLocale = 'zh-CN'
-const SUPPORTED_LOCALES: AppLocale[] = ['zh-CN', 'en-US']
+const SUPPORTED_LOCALES: AppLocale[] = ['zh-CN', 'en-US', 'pt-BR']
 
 function resolveInitialLocale(): AppLocale {
   const saved = localStorage.getItem(LOCALE_STORAGE_KEY)
@@ -15,7 +16,9 @@ function resolveInitialLocale(): AppLocale {
     return saved as AppLocale
   }
   const browserLocale = navigator.language.toLowerCase()
-  return browserLocale.startsWith('zh') ? 'zh-CN' : 'en-US'
+  if (browserLocale.startsWith('zh')) return 'zh-CN'
+  if (browserLocale.startsWith('pt')) return 'pt-BR'
+  return 'en-US'
 }
 
 export const i18n = createI18n({
@@ -25,6 +28,7 @@ export const i18n = createI18n({
   messages: {
     'zh-CN': zhCN,
     'en-US': enUS,
+    'pt-BR': ptBR,
   },
 })
 

@@ -8,6 +8,7 @@ const enUS = {
     switchLabel: 'Switch language',
     zh: '中文',
     en: 'English',
+    pt: 'Português',
   },
   routes: {
     login: 'Login',
@@ -189,11 +190,15 @@ const enUS = {
       latestSnapshot: 'Updated at {time}',
       trendReading: 'Current market samples are already part of the historical analysis layer and can be used directly as AI pricing references.',
       snapshotCount: '{count} records',
+      eyebrow: 'Market Intelligence',
+      trendReadingLabel: 'Trend Reading',
+      snapshotNote: 'Snapshot Note',
       currentMedian: 'Current median:',
       historyMin: 'Historical low:',
       historyMax: 'Historical high:',
     },
     chart: {
+      dailyCurve: 'Daily Price Curve',
       avgPrice: 'Average',
       medianPrice: 'Median',
       noTrend: 'No trend data to render yet',

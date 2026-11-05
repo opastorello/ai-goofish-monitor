@@ -8,6 +8,7 @@ const zhCN = {
     switchLabel: '切换语言',
     zh: '中文',
     en: 'English',
+    pt: 'Português',
   },
   routes: {
     login: '登录',
@@ -189,11 +190,15 @@ const zhCN = {
       latestSnapshot: '最近更新于 {time}',
       trendReading: '当前市场样本已进入历史分析层，可以直接给 AI 价格参照，不再只是新商品列表。',
       snapshotCount: '{count} 条',
+      eyebrow: '市场情报',
+      trendReadingLabel: '趋势解读',
+      snapshotNote: '快照说明',
       currentMedian: '当前中位数：',
       historyMin: '历史最低价：',
       historyMax: '历史最高价：',
     },
     chart: {
+      dailyCurve: '每日价格曲线',
       avgPrice: '均价',
       medianPrice: '中位数',
       noTrend: '暂无可绘制的趋势数据',

@@ -9,6 +9,7 @@ const { t } = useI18n()
 const localeOptions = [
   { value: 'zh-CN', label: '中文', shortLabel: '中' },
   { value: 'en-US', label: 'English', shortLabel: 'EN' },
+  { value: 'pt-BR', label: 'Português', shortLabel: 'PT' },
 ] as const
 </script>
 
