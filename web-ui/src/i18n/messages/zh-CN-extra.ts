@@ -47,6 +47,8 @@ const zhCNExtra = {
       taskName: '任务名称',
       taskNamePlaceholder: '例如：索尼 A7M4 相机',
       keyword: '搜索关键词',
+      titleTriage: "按标题预筛选",
+      titleTriageHint: "打开详情页之前，先用一次文本模型按标题、价格和地区排除明显不符合的商品。能大幅减少详情页访问（也就减少触发闲鱼验证的机会）和图片分析的费用。出错时会照常处理全部商品。",
       maxItems: "单次运行上限",
       maxItemsPlaceholder: "不限制",
       maxItemsHint: "每次运行最多处理的新商品数；留空表示不限制。设置较小的值可降低触发闲鱼风控验证的概率，其余商品会在下次运行时继续处理。",

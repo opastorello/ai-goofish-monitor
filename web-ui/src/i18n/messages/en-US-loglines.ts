@@ -7,6 +7,8 @@ const enUSLogLines = {
     l204: "Account '{account}' is in a risk-control cool-down for about {minutes} more minute(s); this run will not touch Goofish. You can lift it by hand on the Accounts page.",
     l205: "Account rate limit: waiting {seconds}s before opening the next item detail, to avoid triggering risk control.",
     l206: "Risk-control cool-down started for account '{account}' ({minutes} minutes): Goofish will not be accessed again until it ends.",
+    l207: "[Triage] {page}: kept {kept} of {total} new listings; the other {skipped} do not match by title and their detail pages will not be opened.",
+    l208: "[Triage] Call failed; every listing on this page will be processed as usual: {error}",
     l000: "--- Starting monitoring task ---",
     l001: "--- All tasks finished ---",
     l002: "** Debug mode on: each task processes at most {args_debug_l} new items **",

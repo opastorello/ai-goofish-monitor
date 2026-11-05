@@ -20,6 +20,7 @@ def _row_to_task(row) -> Task:
     payload["personal_only"] = bool(payload["personal_only"])
     payload["free_shipping"] = bool(payload["free_shipping"])
     payload["is_running"] = bool(payload["is_running"])
+    payload["title_triage"] = bool(payload.get("title_triage") or 0)
     payload["keyword_rules"] = json.loads(payload.pop("keyword_rules_json") or "[]")
     return Task(**payload)
 
@@ -91,13 +92,13 @@ class SqliteTaskRepository(TaskRepository):
                     id, task_name, enabled, keyword, description, analyze_images,
                     max_pages, personal_only, min_price, max_price, cron,
                     ai_prompt_base_file, ai_prompt_criteria_file, account_state_file,
-                    account_strategy, free_shipping, new_publish_option, region, seller_id, max_items_per_run,
+                    account_strategy, free_shipping, new_publish_option, region, seller_id, max_items_per_run, title_triage,
                     decision_mode, keyword_rules_json, is_running
                 ) VALUES (
                     :id, :task_name, :enabled, :keyword, :description, :analyze_images,
                     :max_pages, :personal_only, :min_price, :max_price, :cron,
                     :ai_prompt_base_file, :ai_prompt_criteria_file, :account_state_file,
-                    :account_strategy, :free_shipping, :new_publish_option, :region, :seller_id, :max_items_per_run,
+                    :account_strategy, :free_shipping, :new_publish_option, :region, :seller_id, :max_items_per_run, :title_triage,
                     :decision_mode, :keyword_rules_json, :is_running
                 )
                 """,
@@ -127,6 +128,7 @@ class SqliteTaskRepository(TaskRepository):
         values["personal_only"] = int(task.personal_only)
         values["free_shipping"] = int(task.free_shipping)
         values["is_running"] = int(task.is_running)
+        values["title_triage"] = int(bool(task.title_triage))
         values["keyword_rules_json"] = json.dumps(task.keyword_rules or [], ensure_ascii=False)
         values.pop("keyword_rules", None)
         return values

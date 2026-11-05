@@ -63,6 +63,10 @@ export interface AiSettings {
   OPENAI_MODEL_NAME?: string
   PROXY_URL?: string
   AI_OUTPUT_LANGUAGE?: string
+  AI_TRIAGE_MODEL_NAME?: string
+  AI_TRIAGE_BASE_URL?: string
+  AI_TRIAGE_API_KEY?: string
+  AI_TRIAGE_API_KEY_SET?: boolean
 }
 
 export interface RotationSettings {

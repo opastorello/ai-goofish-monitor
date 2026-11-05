@@ -102,6 +102,10 @@ export function useSettings() {
       if (aiSettings.value.OPENAI_API_KEY) {
         aiSettings.value.OPENAI_API_KEY = ''
       }
+      if (aiSettings.value.AI_TRIAGE_API_KEY) {
+        aiSettings.value.AI_TRIAGE_API_KEY_SET = true
+        aiSettings.value.AI_TRIAGE_API_KEY = ''
+      }
       // Refresh status
       systemStatus.value = await settingsApi.getSystemStatus()
     } catch (e) {

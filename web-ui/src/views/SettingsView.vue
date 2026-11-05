@@ -326,6 +326,27 @@ watch(selectedPrompt, async (value) => {
               </Select>
               <p class="text-xs text-gray-500">{{ t('settings.ai.outputLanguageHint') }}</p>
             </div>
+            <div class="grid gap-3 rounded-lg border border-slate-200/70 p-4">
+              <div>
+                <Label class="text-sm font-semibold">{{ t('settings.ai.triageTitle') }}</Label>
+                <p class="mt-1 text-xs text-gray-500">{{ t('settings.ai.triageDescription') }}</p>
+              </div>
+              <div class="grid gap-2">
+                <Label>{{ t('settings.ai.triageModel') }}</Label>
+                <Input v-model="aiSettings.AI_TRIAGE_MODEL_NAME" :placeholder="t('settings.ai.triageModelPlaceholder')" />
+              </div>
+              <div class="grid gap-2">
+                <Label>{{ t('settings.ai.triageBaseUrl') }}</Label>
+                <Input v-model="aiSettings.AI_TRIAGE_BASE_URL" placeholder="https://api.deepseek.com" />
+              </div>
+              <div class="grid gap-2">
+                <Label>{{ t('settings.ai.triageApiKey') }}</Label>
+                <Input v-model="aiSettings.AI_TRIAGE_API_KEY" type="password" :placeholder="t('settings.ai.keyPlaceholder')" />
+                <p class="text-xs text-gray-500">
+                  {{ aiSettings.AI_TRIAGE_API_KEY_SET ? t('settings.ai.keyConfigured') : t('settings.ai.triageKeyEmpty') }}
+                </p>
+              </div>
+            </div>
             <div class="grid gap-2">
               <Label>{{ t('settings.ai.proxy') }}</Label>
               <Input v-model="aiSettings.PROXY_URL" placeholder="http://127.0.0.1:7890" />

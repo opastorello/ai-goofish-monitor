@@ -47,6 +47,8 @@ const enUSExtra = {
       taskName: 'Task Name',
       taskNamePlaceholder: 'Example: Sony A7M4 Camera',
       keyword: 'Search Keyword',
+      titleTriage: "Title triage",
+      titleTriageHint: "Before opening detail pages, one text-only model call drops the obvious mismatches by title, price and region. It cuts detail-page visits (and so the chance of triggering Goofish verification) and the cost of image analysis. If anything goes wrong, every listing is processed as usual.",
       maxItems: "Items per run",
       maxItemsPlaceholder: "No limit",
       maxItemsHint: "Maximum new items processed in one run; leave empty for no limit. A small value lowers the chance of triggering Goofish verification, and the remaining items are picked up on the next run.",

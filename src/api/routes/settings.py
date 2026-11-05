@@ -108,6 +108,9 @@ class AISettingsModel(BaseModel):
     SKIP_AI_ANALYSIS: Optional[bool] = None
     PROXY_URL: Optional[str] = None
     AI_OUTPUT_LANGUAGE: Optional[str] = None
+    AI_TRIAGE_MODEL_NAME: Optional[str] = None
+    AI_TRIAGE_BASE_URL: Optional[str] = None
+    AI_TRIAGE_API_KEY: Optional[str] = None
 
 
 class RotationSettingsModel(BaseModel):
@@ -266,6 +269,10 @@ async def get_ai_settings():
         "AI_OUTPUT_LANGUAGE": normalize_output_language(
             env_manager.get_value("AI_OUTPUT_LANGUAGE", "")
         ),
+        "AI_TRIAGE_MODEL_NAME": env_manager.get_value("AI_TRIAGE_MODEL_NAME", ""),
+        "AI_TRIAGE_BASE_URL": env_manager.get_value("AI_TRIAGE_BASE_URL", ""),
+        # the key itself is never returned, only whether one is stored
+        "AI_TRIAGE_API_KEY_SET": bool(env_manager.get_value("AI_TRIAGE_API_KEY", "")),
     }
 
 
@@ -284,6 +291,12 @@ async def update_ai_settings(settings: AISettingsModel):
         updates["PROXY_URL"] = settings.PROXY_URL
     if settings.AI_OUTPUT_LANGUAGE is not None:
         updates["AI_OUTPUT_LANGUAGE"] = normalize_output_language(settings.AI_OUTPUT_LANGUAGE)
+    if settings.AI_TRIAGE_MODEL_NAME is not None:
+        updates["AI_TRIAGE_MODEL_NAME"] = settings.AI_TRIAGE_MODEL_NAME.strip()
+    if settings.AI_TRIAGE_BASE_URL is not None:
+        updates["AI_TRIAGE_BASE_URL"] = settings.AI_TRIAGE_BASE_URL.strip()
+    if settings.AI_TRIAGE_API_KEY:  # blank keeps the stored key, like OPENAI_API_KEY
+        updates["AI_TRIAGE_API_KEY"] = settings.AI_TRIAGE_API_KEY.strip()
 
     success = env_manager.update_values(updates)
     if not success:

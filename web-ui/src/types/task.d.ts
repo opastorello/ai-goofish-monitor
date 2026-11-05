@@ -22,6 +22,7 @@ export interface Task {
   region?: string | null;
   seller_id?: string | null;
   max_items_per_run?: number | null;
+  title_triage?: boolean;
   decision_mode: 'ai' | 'keyword';
   keyword_rules: string[];
   is_running: boolean;
@@ -75,6 +76,7 @@ export interface TaskGenerateRequest {
   region?: string | null;
   seller_id?: string | null;
   max_items_per_run?: number | null;
+  title_triage?: boolean;
   decision_mode?: 'ai' | 'keyword';
   keyword_rules?: string[];
 }

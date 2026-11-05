@@ -7,6 +7,8 @@ const ptBRLogLines = {
     l204: "A conta '{account}' está em resfriamento de controle de risco por mais cerca de {minutes} minuto(s); esta execução não vai acessar o Goofish. Você pode liberar manualmente na página de Contas.",
     l205: "Limite de requisições da conta: aguardando {seconds}s antes de abrir o próximo detalhe de anúncio, para não acionar o controle de risco.",
     l206: "Resfriamento de controle de risco iniciado para a conta '{account}' ({minutes} minutos): o Goofish não será acessado de novo até terminar.",
+    l207: "[Triagem] {page}: {kept} de {total} anúncios novos mantidos; os outros {skipped} não combinam pelo título e as páginas de detalhe deles não serão abertas.",
+    l208: "[Triagem] Falha na chamada; todos os anúncios desta página serão processados normalmente: {error}",
     l000: "--- Iniciando tarefa de monitoramento ---",
     l001: "--- Todas as tarefas foram concluídas ---",
     l002: "** Modo de depuração ativo: cada tarefa processa no máximo {args_debug_l} anúncios novos **",

@@ -14,6 +14,7 @@ from playwright.async_api import (
     async_playwright,
 )
 
+from src.title_triage import triage_items
 from src.account_guard import AccountGuard, account_key
 from src.seller_scraper import collect_seller_cards, filter_seller_items, parse_seller_id
 from src.ai_handler import (
@@ -545,6 +546,7 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
 
     # 单次运行最多处理的新商品数：调试上限与任务设置取较小的正数（0 = 不限制）
     item_cap = _positive_int(task_config.get("max_items_per_run"))
+    use_title_triage = bool(task_config.get("title_triage")) and decision_mode == "ai" and not SKIP_AI_ANALYSIS
     run_item_limit = min((n for n in (debug_limit, item_cap) if n and n > 0), default=0)
     seller_min_price = _price_bound(task_config.get("min_price"))
     seller_max_price = _price_bound(task_config.get("max_price"))
@@ -708,7 +710,31 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                 );
             """)
 
-            async def process_basic_items(basic_items: list) -> None:
+            async def triage_basic_items(basic_items: list, page_label: str) -> list:
+                """Drop clear mismatches by title before any detail page is opened (fail-open)."""
+                if not use_title_triage or not basic_items:
+                    return basic_items
+                fresh = [
+                    item for item in basic_items
+                    if get_link_unique_key(item["商品链接"]) not in processed_links
+                ]
+                if not fresh:
+                    return basic_items
+                result = await triage_items(
+                    fresh,
+                    description=task_config.get("description") or "",
+                    keyword=keyword,
+                )
+                if result.error:
+                    print(f"[预筛选] 调用失败，本页全部商品都会照常处理: {result.error}")
+                    return basic_items
+                log_time(
+                    f"[预筛选] {page_label}：{len(fresh)} 个新商品里保留 {len(result.kept)} 个，"
+                    f"其余 {len(result.skipped)} 个按标题判断不符合，不会打开详情页。"
+                )
+                return result.kept
+
+            async def process_basic_items(basic_items: list, market_items: Optional[list] = None) -> None:
                 """Fetch details and submit each new item for analysis (shared by the search and seller flows)."""
                 nonlocal processed_item_count, stop_scraping
 
@@ -847,7 +873,7 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                             price_reference = build_market_reference(
                                 keyword=keyword,
                                 item=item_data,
-                                current_market_items=basic_items,
+                                current_market_items=(market_items if market_items is not None else basic_items),
                                 historical_snapshots=historical_snapshots,
                             )
                             final_record["价格参考"] = price_reference
@@ -947,7 +973,8 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                     log_time(
                         f"店铺 '{seller_name or seller_id}' 共读取 {len(seller_cards)} 件商品，符合条件 {len(seller_items)} 件。"
                     )
-                    await process_basic_items(seller_items)
+                    items_to_open = await triage_basic_items(seller_items, "店铺")
+                    await process_basic_items(items_to_open, market_items=seller_items)
                     return processed_item_count
 
                 log_time("步骤 1 - 导航到搜索结果页...")
@@ -1255,7 +1282,8 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                         )
                     )
 
-                    await process_basic_items(basic_items)
+                    items_to_open = await triage_basic_items(basic_items, f"第 {page_num} 页")
+                    await process_basic_items(items_to_open, market_items=basic_items)
 
                     # --- 新增: 在处理完一页所有商品后，翻页前，增加一个更长的“休息”时间 ---
                     if not stop_scraping and page_num < max_pages:

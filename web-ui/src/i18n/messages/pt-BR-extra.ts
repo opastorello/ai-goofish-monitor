@@ -47,6 +47,8 @@ const ptBRExtra = {
       taskName: 'Nome da tarefa',
       taskNamePlaceholder: 'Exemplo: Câmera Sony A7M4',
       keyword: 'Palavra-chave de busca',
+      titleTriage: "Pré-triagem por título",
+      titleTriageHint: "Antes de abrir as páginas de detalhe, uma única chamada a um modelo de texto descarta os anúncios claramente fora do pedido, olhando título, preço e região. Reduz as visitas aos detalhes (e a chance de acionar a verificação do Goofish) e o custo da análise de imagens. Se algo falhar, todos os anúncios são processados normalmente.",
       maxItems: "Anúncios por execução",
       maxItemsPlaceholder: "Sem limite",
       maxItemsHint: "Máximo de anúncios novos processados em uma execução; deixe vazio para não limitar. Um valor baixo reduz a chance de acionar a verificação do Goofish, e o restante é pego na próxima execução.",

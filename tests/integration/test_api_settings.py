@@ -1,3 +1,5 @@
+import json
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -18,6 +20,9 @@ _SETTINGS_ENV_KEYS = [
     "PROXY_ROTATION_RETRY_LIMIT",
     "PROXY_BLACKLIST_TTL",
     "AI_OUTPUT_LANGUAGE",
+    "AI_TRIAGE_MODEL_NAME",
+    "AI_TRIAGE_BASE_URL",
+    "AI_TRIAGE_API_KEY",
     "OPENAI_API_KEY",
     "OPENAI_BASE_URL",
     "OPENAI_MODEL_NAME",
@@ -340,6 +345,9 @@ def test_ai_settings_fall_back_to_runtime_environment_when_env_file_missing(tmp_
         "SKIP_AI_ANALYSIS": False,
         "PROXY_URL": "http://127.0.0.1:7890",
         "AI_OUTPUT_LANGUAGE": "zh-CN",
+        "AI_TRIAGE_MODEL_NAME": "",
+        "AI_TRIAGE_BASE_URL": "",
+        "AI_TRIAGE_API_KEY_SET": False,
     }
 
     status_response = client.get("/api/settings/status")
@@ -453,3 +461,28 @@ def test_ai_output_language_is_saved_and_unknown_values_fall_back(tmp_path, monk
 
     assert client.put("/api/settings/ai", json={"AI_OUTPUT_LANGUAGE": "fr-FR"}).status_code == 200
     assert client.get("/api/settings/ai").json()["AI_OUTPUT_LANGUAGE"] == "zh-CN"
+
+
+def test_ai_triage_settings_are_saved_and_the_key_is_never_returned(tmp_path, monkeypatch):
+    _clear_settings_env(monkeypatch)
+    env_file = tmp_path / ".env"
+    env_file.write_text("OPENAI_BASE_URL=https://x.example.com/v1\n", encoding="utf-8")
+    monkeypatch.setattr(env_manager, "env_file", env_file)
+    client = _build_settings_client()
+
+    payload = {
+        "AI_TRIAGE_MODEL_NAME": "deepseek-chat",
+        "AI_TRIAGE_BASE_URL": "https://api.deepseek.com",
+        "AI_TRIAGE_API_KEY": "sk-secret",
+    }
+    assert client.put("/api/settings/ai", json=payload).status_code == 200
+    saved = client.get("/api/settings/ai").json()
+    assert saved["AI_TRIAGE_MODEL_NAME"] == "deepseek-chat"
+    assert saved["AI_TRIAGE_BASE_URL"] == "https://api.deepseek.com"
+    assert saved["AI_TRIAGE_API_KEY_SET"] is True
+    assert "sk-secret" not in json.dumps(saved)
+
+    # a blank key keeps the stored one; clearing the model switches the triage back to the main model
+    assert client.put("/api/settings/ai", json={"AI_TRIAGE_API_KEY": "", "AI_TRIAGE_MODEL_NAME": ""}).status_code == 200
+    again = client.get("/api/settings/ai").json()
+    assert again["AI_TRIAGE_API_KEY_SET"] is True and again["AI_TRIAGE_MODEL_NAME"] == ""
