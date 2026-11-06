@@ -19,6 +19,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Callable, Optional
 
+from src.cookie_state import normalize_state
+
 ANTI_BOT_NAMES = ("x5sec", "mtop_partitioned_detect")
 
 
@@ -59,7 +61,7 @@ def save_session_cookies(state_path: str, fresh_cookies: list[dict], *, now: Opt
     (headers, env, storage...). Atomic write. Returns True when the file changed.
     """
     with open(state_path, "r", encoding="utf-8") as handle:
-        snapshot = json.load(handle)
+        snapshot = normalize_state(json.load(handle))
     if not isinstance(snapshot, dict):
         return False
     existing = snapshot.get("cookies") or []

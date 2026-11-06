@@ -7,6 +7,7 @@ is scraped. Cookie values are never returned.
 """
 from __future__ import annotations
 
+from src.cookie_state import normalize_state
 import hashlib
 import json
 import os
@@ -35,7 +36,7 @@ def generate_sign(timestamp_ms: str, token: str, data: str) -> str:
 
 def _load_cookies(state_path: str) -> tuple[dict[str, str], dict]:
     with open(state_path, "r", encoding="utf-8") as handle:
-        snapshot = json.load(handle)
+        snapshot = normalize_state(json.load(handle))
     cookies = {
         str(item["name"]): str(item["value"])
         for item in (snapshot.get("cookies") or [])

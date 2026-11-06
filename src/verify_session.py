@@ -18,6 +18,7 @@ import time
 from playwright.async_api import async_playwright
 
 from src.account_guard import AccountGuard, account_key
+from src.cookie_state import normalize_state
 from src.config import DETAIL_API_URL_PATTERN
 from src.human_verification import wait_for_human_verification
 from src.scraper import (
@@ -59,13 +60,13 @@ async def run(state_file: str, url: str | None) -> int:
     account = account_key(state_file)
     write_status("opening", account)
     with open(state_file, "r", encoding="utf-8") as handle:
-        snapshot = json.load(handle)
+        snapshot = normalize_state(json.load(handle))
     async with async_playwright() as p:
         browser = await p.chromium.launch(
             headless=False, args=prepare_chromium_launch_args(), channel=_resolve_browser_channel()
         )
         kwargs = _default_context_options()
-        storage_state = state_file
+        storage_state = snapshot if isinstance(snapshot, dict) else state_file
         if isinstance(snapshot, dict) and any(k in snapshot for k in ("env", "headers", "page", "storage")):
             storage_state = {"cookies": snapshot.get("cookies", [])}
             kwargs.update(_build_context_overrides(snapshot))

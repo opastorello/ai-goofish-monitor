@@ -17,6 +17,7 @@ from playwright.async_api import (
 from src.human_verification import wait_for_human_verification
 from src.title_triage import triage_items
 from src.account_guard import AccountGuard, account_key
+from src.cookie_state import normalize_state
 from src.seller_scraper import collect_seller_cards, filter_seller_items, parse_seller_id
 from src.ai_handler import (
     download_all_images,
@@ -638,7 +639,7 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
         snapshot_data = None
         try:
             with open(state_file, "r", encoding="utf-8") as f:
-                snapshot_data = json.load(f)
+                snapshot_data = normalize_state(json.load(f))
         except Exception as e:
             print(f"警告：读取登录状态文件失败，将直接按路径使用: {e}")
 
