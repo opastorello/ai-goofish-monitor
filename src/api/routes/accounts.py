@@ -5,6 +5,9 @@ import json
 import os
 import re
 import asyncio
+import subprocess
+import sys
+import time
 import aiofiles
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -111,6 +114,48 @@ async def reset_guard(body: Optional[GuardResetRequest] = None):
     if task_name is None:
         count += await asyncio.to_thread(AccountGuard().reset, account)
     return {"message": "风控保护已重置", "reset": count}
+
+
+VERIFY_STATUS_FILE = os.path.join("logs", "account-verify.json")
+_verify_process: Optional[subprocess.Popen] = None
+
+
+def _read_verify_status() -> dict:
+    try:
+        with open(VERIFY_STATUS_FILE, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        return {"status": "idle"}
+    running = _verify_process is not None and _verify_process.poll() is None
+    if data.get("status") in ("opening", "waiting") and not running:
+        data["status"] = "closed"  # the window/process is gone
+    return data
+
+
+@router.get("/verify/status", response_model=dict)
+async def get_verify_status():
+    """The "solve the slider" window: idle / opening / waiting / solved / closed / timeout."""
+    return _read_verify_status()
+
+
+@router.post("/{name}/verify", response_model=dict)
+async def start_verification(name: str):
+    """Open a visible browser with this account so a person can solve the slider.
+
+    The window opens on the machine running the server (meant for local use)."""
+    global _verify_process
+    account_name = _validate_name(name)
+    path = _account_path(account_name)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="账号不存在")
+    if _verify_process is not None and _verify_process.poll() is None:
+        raise HTTPException(status_code=409, detail="已有一个验证窗口在运行。")
+    _verify_process = subprocess.Popen(
+        [sys.executable, "-m", "src.verify_session", path],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True,
+    )
+    await asyncio.sleep(0.2)
+    return {"message": "验证窗口已打开", "account": account_name}
 
 
 @router.get("/{name}/status", response_model=dict)

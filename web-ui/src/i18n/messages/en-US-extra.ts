@@ -186,6 +186,21 @@ const enUSExtra = {
       noX5sec: "No x5sec cookie: Goofish may challenge the scraper. Browse Goofish normally for 3-5 minutes in your browser, then export the login again.",
       checkedAt: "Checked: {time}",
     },
+    verify: {
+      button: "Solve verification",
+      waiting: "Waiting for the slider…",
+      opened: "Window opened: solve the slider in the browser.",
+      solved: "Verification complete. Account released.",
+      failed: "Could not open the window",
+      hint: "Opens a Chrome on this machine with the account; solve the slider and the monitor keeps the session and lifts the cool-down.",
+      state: {
+        opening: "Opening the browser…",
+        waiting: "Waiting for you to solve the slider in the open window…",
+        solved: "Verification complete; account released.",
+        closed: "The window was closed without finishing.",
+        timeout: "Timed out without finishing the verification.",
+      },
+    },
     guard: {
       title: "Risk-control guard",
       description: "A task is paused after {threshold} consecutive failures so it stops triggering Goofish verification. Once the login is sorted out, lift the pause here.",

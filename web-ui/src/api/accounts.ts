@@ -93,3 +93,17 @@ export async function resetGuard(target: { taskName?: string; account?: string }
     body: JSON.stringify(body),
   })
 }
+
+export interface VerifyStatus {
+  status: 'idle' | 'opening' | 'waiting' | 'solved' | 'closed' | 'timeout'
+  account?: string
+  message?: string
+}
+
+export async function startVerification(name: string): Promise<{ message: string; account: string }> {
+  return await http(`/api/accounts/${encodeURIComponent(name)}/verify`, { method: 'POST' })
+}
+
+export async function getVerifyStatus(): Promise<VerifyStatus> {
+  return await http('/api/accounts/verify/status')
+}

@@ -186,6 +186,21 @@ const ptBRExtra = {
       noX5sec: "Sem o cookie x5sec: o Goofish pode desafiar o scraper. Navegue normalmente no Goofish por 3–5 minutos no seu navegador e exporte o login de novo.",
       checkedAt: "Verificado: {time}",
     },
+    verify: {
+      button: "Resolver verificação",
+      waiting: "Aguardando o slider…",
+      opened: "Janela aberta: resolva o slider no navegador.",
+      solved: "Verificação concluída. Conta liberada.",
+      failed: "Não foi possível abrir a janela",
+      hint: "Abre um Chrome nesta máquina com a conta; resolva o slider e o monitor guarda a sessão e libera o resfriamento.",
+      state: {
+        opening: "Abrindo o navegador…",
+        waiting: "Aguardando você resolver o slider na janela aberta…",
+        solved: "Verificação concluída; conta liberada.",
+        closed: "A janela foi fechada sem concluir.",
+        timeout: "Tempo esgotado sem concluir a verificação.",
+      },
+    },
     guard: {
       title: "Guard anti-bloqueio",
       description: "Uma tarefa é pausada após {threshold} falhas seguidas para parar de acionar a verificação do Goofish. Depois de resolver o login, você pode liberar a pausa aqui.",

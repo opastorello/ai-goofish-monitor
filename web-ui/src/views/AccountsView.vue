@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
@@ -11,6 +11,9 @@ import {
   getAccountStatus,
   getGuardState,
   resetGuard,
+  startVerification,
+  getVerifyStatus,
+  type VerifyStatus,
   type AccountItem,
   type AccountStatus,
   type GuardState,
@@ -106,6 +109,48 @@ async function fetchGuard() {
     isGuardLoading.value = false
   }
 }
+
+const verify = ref<VerifyStatus>({ status: 'idle' })
+const isVerifying = ref(false)
+let verifyTimer: ReturnType<typeof setInterval> | null = null
+
+function stopVerifyPolling() {
+  if (verifyTimer) {
+    clearInterval(verifyTimer)
+    verifyTimer = null
+  }
+}
+
+async function pollVerify() {
+  try {
+    verify.value = await getVerifyStatus()
+  } catch {
+    return
+  }
+  if (!['opening', 'waiting'].includes(verify.value.status)) {
+    stopVerifyPolling()
+    isVerifying.value = false
+    if (verify.value.status === 'solved') {
+      toast({ title: t('accounts.verify.solved') })
+      await fetchGuard()
+    }
+  }
+}
+
+async function handleVerify(account: string) {
+  isVerifying.value = true
+  try {
+    await startVerification(account)
+    toast({ title: t('accounts.verify.opened') })
+    stopVerifyPolling()
+    verifyTimer = setInterval(pollVerify, 2000)
+  } catch (e) {
+    isVerifying.value = false
+    toast({ title: t('accounts.verify.failed'), description: (e as Error).message, variant: 'destructive' })
+  }
+}
+
+onBeforeUnmount(stopVerifyPolling)
 
 async function handleResetGuard(target: { taskName?: string; account?: string } = {}) {
   isResettingGuard.value = true
@@ -286,12 +331,21 @@ onMounted(() => {
                   {{ t('accounts.guard.lastError', { reason: item.reason }) }}
                 </p>
               </div>
-              <Button size="sm" variant="outline" :disabled="isResettingGuard || !item.cooling_down" @click="handleResetGuard({ account: item.account })">
-                {{ t('accounts.guard.resetAccount') }}
-              </Button>
+              <div class="flex flex-wrap items-center gap-2">
+                <Button size="sm" :disabled="isVerifying" @click="handleVerify(item.account)">
+                  {{ isVerifying ? t('accounts.verify.waiting') : t('accounts.verify.button') }}
+                </Button>
+                <Button size="sm" variant="outline" :disabled="isResettingGuard || !item.cooling_down" @click="handleResetGuard({ account: item.account })">
+                  {{ t('accounts.guard.resetAccount') }}
+                </Button>
+              </div>
             </li>
           </ul>
         </div>
+        <p v-if="verify.status !== 'idle'" class="mb-2 text-xs text-slate-600">
+          {{ t(`accounts.verify.state.${verify.status}`) }}
+        </p>
+        <p class="mb-3 text-xs text-slate-500">{{ t('accounts.verify.hint') }}</p>
         <p class="mb-3 text-xs text-slate-500">{{ t('accounts.guard.localOnlyHint', { minutes: Math.round((guard?.cooldown_seconds ?? 1800) / 60) }) }}</p>
         <p v-if="!guard?.tasks.length" class="py-4 text-center text-sm text-muted-foreground">{{ t('accounts.guard.empty') }}</p>
         <ul v-else class="divide-y divide-slate-100">

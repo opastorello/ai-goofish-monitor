@@ -186,6 +186,21 @@ const zhCNExtra = {
       noX5sec: "缺少 x5sec Cookie：闲鱼可能会对爬虫发起验证。请在浏览器里正常浏览闲鱼 3–5 分钟后重新导出登录态。",
       checkedAt: "检查时间：{time}",
     },
+    verify: {
+      button: "解决验证",
+      waiting: "等待滑块验证…",
+      opened: "窗口已打开：请在浏览器里完成滑动验证。",
+      solved: "验证完成，账号已解除冷却。",
+      failed: "无法打开验证窗口",
+      hint: "在本机打开一个带有该账号的 Chrome；完成滑动验证后，监控会保存登录态并解除冷却。",
+      state: {
+        opening: "正在打开浏览器…",
+        waiting: "请在已打开的窗口里完成滑动验证…",
+        solved: "验证完成，账号已解除冷却。",
+        closed: "窗口已关闭，验证未完成。",
+        timeout: "等待超时，验证未完成。",
+      },
+    },
     guard: {
       title: "风控保护（熔断）",
       description: "任务连续失败 {threshold} 次后会被暂停，避免继续触发闲鱼风控。登录态问题解决后，可在这里手动解除。",
