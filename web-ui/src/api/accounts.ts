@@ -46,6 +46,7 @@ export interface AccountStatus {
   tracknick: string
   reason: string
   anti_bot_cookies: { x5sec: boolean; mtop_partitioned_detect: boolean }
+  x5sec_expires_at?: string | null
   checked_at: string
 }
 

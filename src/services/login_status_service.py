@@ -45,6 +45,16 @@ def _load_cookies(state_path: str) -> tuple[dict[str, str], dict]:
     return cookies, snapshot if isinstance(snapshot, dict) else {}
 
 
+def _x5sec_expiry(snapshot: dict) -> Optional[str]:
+    """ISO time the anti-bot cookie expires (None when absent or a session cookie)."""
+    for cookie in (snapshot or {}).get("cookies") or []:
+        if isinstance(cookie, dict) and cookie.get("name") == "x5sec":
+            expires = cookie.get("expires")
+            if isinstance(expires, (int, float)) and expires > 0:
+                return datetime.fromtimestamp(expires, tz=timezone.utc).isoformat()
+    return None
+
+
 def _token_parts(cookies: dict[str, str]) -> tuple[str, Optional[datetime]]:
     raw = cookies.get("_m_h5_tk", "")
     token, _, expiry = raw.partition("_")
@@ -114,6 +124,7 @@ def check_login_state(
         "reason": "",
         "anti_bot_cookies": {"x5sec": False, "mtop_partitioned_detect": False},
         "h5_token_expires_at": None,
+        "x5sec_expires_at": None,
         "checked_at": datetime.now(timezone.utc).isoformat(),
     }
     if not os.path.isfile(state_path):
@@ -129,6 +140,7 @@ def check_login_state(
         "x5sec": "x5sec" in cookies,
         "mtop_partitioned_detect": "mtop_partitioned_detect" in cookies,
     }
+    result["x5sec_expires_at"] = _x5sec_expiry(snapshot)
     result["unb"] = cookies.get("unb", "")
     result["tracknick"] = cookies.get("tracknick", "")
     token, expires_at = _token_parts(cookies)

@@ -51,4 +51,6 @@ def test_save_to_jsonl(tmp_path, monkeypatch):
             sort_order="asc",
         )
     )
-    assert records == [record]
+    # the loader adds bookkeeping fields (_status, _hidden_reason...); the saved record must be intact
+    assert len(records) == 1
+    assert {k: v for k, v in records[0].items() if not k.startswith("_")} == record

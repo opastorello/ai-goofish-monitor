@@ -142,6 +142,7 @@ class Task(BaseModel):
     region: Optional[str] = None
     seller_id: Optional[str] = None
     max_items_per_run: Optional[int] = Field(None, ge=1)
+    min_seller_level: Optional[int] = Field(None, ge=0, le=20)
     title_triage: bool = False
     decision_mode: Literal["ai", "keyword"] = "ai"
     keyword_rules: List[str] = Field(default_factory=list)
@@ -195,6 +196,7 @@ class TaskCreate(BaseModel):
     region: Optional[str] = None
     seller_id: Optional[str] = None
     max_items_per_run: Optional[int] = Field(None, ge=1)
+    min_seller_level: Optional[int] = Field(None, ge=0, le=20)
     title_triage: bool = False
     decision_mode: Literal["ai", "keyword"] = "ai"
     keyword_rules: List[str] = Field(default_factory=list)
@@ -270,6 +272,7 @@ class TaskUpdate(BaseModel):
     region: Optional[str] = None
     seller_id: Optional[str] = None
     max_items_per_run: Optional[int] = Field(None, ge=1)
+    min_seller_level: Optional[int] = Field(None, ge=0, le=20)
     title_triage: Optional[bool] = None
     decision_mode: Optional[Literal["ai", "keyword"]] = None
     keyword_rules: Optional[List[str]] = None
@@ -342,6 +345,7 @@ class TaskGenerateRequest(BaseModel):
     region: Optional[str] = None
     seller_id: Optional[str] = None
     max_items_per_run: Optional[int] = Field(None, ge=1)
+    min_seller_level: Optional[int] = Field(None, ge=0, le=20)
     title_triage: bool = False
     decision_mode: Literal["ai", "keyword"] = "ai"
     keyword_rules: List[str] = Field(default_factory=list)

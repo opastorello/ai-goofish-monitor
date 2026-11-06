@@ -4,6 +4,8 @@
 """
 from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import asyncio
+import os
 from typing import List
 
 from src.core.cron_utils import build_cron_trigger
@@ -22,6 +24,7 @@ class SchedulerService:
         """启动调度器"""
         if not self.scheduler.running:
             self.scheduler.start()
+            self._add_session_refresh_job()
             print("调度器已启动")
 
     def stop(self):
@@ -49,10 +52,35 @@ class SchedulerService:
         except Exception:
             return None
 
+    def _add_session_refresh_job(self):
+        """每 30 分钟刷新各账号的 _m_h5_tk（轻量请求，不开浏览器）。"""
+        self.scheduler.add_job(
+            self._refresh_sessions,
+            trigger="interval",
+            minutes=30,
+            id="session_refresh",
+            name="Refresh account tokens",
+            replace_existing=True,
+        )
+
+    async def _refresh_sessions(self):
+        from src.session_refresh import refresh_all_accounts
+
+        state_dir = (os.getenv("ACCOUNT_STATE_DIR", "state") or "state").strip().strip('"').strip("'")
+        try:
+            reports = await asyncio.to_thread(refresh_all_accounts, state_dir)
+        except Exception as exc:  # noqa: BLE001 - never let a refresh break the scheduler
+            print(f"[会话刷新] 失败: {exc}")
+            return
+        for report in reports:
+            if report.get("refreshed"):
+                print(f"[会话刷新] {report['state']}: {report['reason']}")
+
     async def reload_jobs(self, tasks: List[Task]):
         """重新加载所有定时任务"""
         print("正在重新加载定时任务...")
         self.scheduler.remove_all_jobs()
+        self._add_session_refresh_job()
 
         for task in tasks:
             if task.enabled and task.cron:

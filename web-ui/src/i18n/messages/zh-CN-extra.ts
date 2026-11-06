@@ -52,6 +52,9 @@ const zhCNExtra = {
       maxItems: "单次运行上限",
       maxItemsPlaceholder: "不限制",
       maxItemsHint: "每次运行最多处理的新商品数；留空表示不限制。设置较小的值可降低触发闲鱼风控验证的概率，其余商品会在下次运行时继续处理。",
+      minSellerLevel: "卖家最低等级",
+      minSellerLevelPlaceholder: "不限制",
+      minSellerLevelHint: "例如 7 表示 L7 及以上。低于该等级的卖家在打开商品后被丢弃，不消耗 AI 分析。若闲鱼未返回等级，则正常处理该商品。",
       seller: "店铺 / 卖家（可选）",
       sellerPlaceholder: "店铺链接或卖家ID，例如 https://www.goofish.com/personal?userId=391299371",
       sellerHint: "填写后只监控该店铺的在售商品，不再做关键词搜索；关键词改为按商品标题过滤（留空则分析全部商品）。价格范围仍然生效。",
@@ -184,6 +187,8 @@ const zhCNExtra = {
       invalid_file: "登录态文件无法读取",
       error: "检查失败",
       noX5sec: "缺少 x5sec Cookie：闲鱼可能会对爬虫发起验证。请在浏览器里正常浏览闲鱼 3–5 分钟后重新导出登录态。",
+      x5secExpired: "反爬 Cookie（x5sec）已过期：请点击“解决验证”。",
+      x5secSoon: "反爬 Cookie（x5sec）约 {hours} 小时后过期。",
       checkedAt: "检查时间：{time}",
     },
     verify: {

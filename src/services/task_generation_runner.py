@@ -41,6 +41,7 @@ def build_task_create(req: TaskGenerateRequest, criteria_file: str) -> TaskCreat
         seller_id=req.seller_id,
         max_items_per_run=req.max_items_per_run,
         title_triage=req.title_triage,
+        min_seller_level=req.min_seller_level,
         decision_mode=req.decision_mode or "ai",
         keyword_rules=req.keyword_rules,
     )

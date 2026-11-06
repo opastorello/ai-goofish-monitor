@@ -44,6 +44,7 @@ SCHEMA_STATEMENTS = (
         seller_id TEXT,
         max_items_per_run INTEGER,
         title_triage INTEGER,
+        min_seller_level INTEGER,
         decision_mode TEXT NOT NULL,
         keyword_rules_json TEXT NOT NULL,
         is_running INTEGER NOT NULL
@@ -149,6 +150,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
     _migrate_tasks_seller_id(conn)
     _migrate_tasks_max_items_per_run(conn)
     _migrate_tasks_title_triage(conn)
+    _migrate_tasks_min_seller_level(conn)
     conn.commit()
 
 
@@ -164,6 +166,13 @@ def _migrate_tasks_max_items_per_run(conn: sqlite3.Connection) -> None:
     cols = [r[1] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()]
     if "max_items_per_run" not in cols:
         conn.execute("ALTER TABLE tasks ADD COLUMN max_items_per_run INTEGER")
+
+
+def _migrate_tasks_min_seller_level(conn: sqlite3.Connection) -> None:
+    """为 tasks 表添加 min_seller_level 列（卖家等级下限，NULL = 不限制）。"""
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()]
+    if "min_seller_level" not in cols:
+        conn.execute("ALTER TABLE tasks ADD COLUMN min_seller_level INTEGER")
 
 
 def _migrate_tasks_title_triage(conn: sqlite3.Connection) -> None:

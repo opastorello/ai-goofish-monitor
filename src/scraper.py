@@ -18,6 +18,8 @@ from src.human_verification import wait_for_human_verification
 from src.title_triage import triage_items
 from src.account_guard import AccountGuard, account_key
 from src.cookie_state import normalize_state
+from src.skip_cache import SkipCache
+from src.seller_stats import extract_seller_stats, meets_min_level
 from src.seller_scraper import collect_seller_cards, filter_seller_items, parse_seller_id
 from src.ai_handler import (
     download_all_images,
@@ -80,6 +82,7 @@ class LoginRequiredError(Exception):
 
 FAILURE_GUARD = FailureGuard()
 ACCOUNT_GUARD = AccountGuard()
+SKIP_CACHE = SkipCache()
 EDGE_DOCKER_WARNING_PRINTED = False
 
 
@@ -765,6 +768,11 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                             f"[页内进度 {i}/{total_items_on_page}] 商品 '{item_data['商品标题'][:20]}...' 已存在，跳过。"
                         )
                         continue
+                    if SKIP_CACHE.has(task_config.get("task_name", ""), unique_key):
+                        log_time(
+                            f"[页内进度 {i}/{total_items_on_page}] 商品 '{item_data['商品标题'][:20]}...' 之前因卖家等级被跳过，不再打开详情页。"
+                        )
+                        continue
 
                     log_time(
                         f"[页内进度 {i}/{total_items_on_page}] 发现新商品，获取详情: {item_data['商品标题'][:30]}..."
@@ -838,6 +846,19 @@ async def scrape_xianyu(task_config: dict, debug_limit: int = 0):
                             seller_do = await safe_get(
                                 detail_json, "data", "sellerDO", default={}
                             )
+
+                            seller_stats = extract_seller_stats(seller_do)
+                            seller_level = seller_stats.get("level")
+                            if seller_stats:
+                                item_data["卖家统计"] = seller_stats
+                            min_seller_level = task_config.get("min_seller_level")
+                            if not meets_min_level(seller_level, min_seller_level):
+                                log_time(
+                                    f"卖家等级 L{seller_level} 低于要求的 L{min_seller_level}，跳过该商品（不做 AI 分析）。"
+                                )
+                                processed_links.add(unique_key)
+                                SKIP_CACHE.add(task_config.get("task_name", ""), unique_key)
+                                continue
 
                             reg_days_raw = await safe_get(
                                 seller_do, "userRegDay", default=0

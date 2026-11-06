@@ -52,6 +52,9 @@ const ptBRExtra = {
       maxItems: "Anúncios por execução",
       maxItemsPlaceholder: "Sem limite",
       maxItemsHint: "Máximo de anúncios novos processados em uma execução; deixe vazio para não limitar. Um valor baixo reduz a chance de acionar a verificação do Goofish, e o restante é pego na próxima execução.",
+      minSellerLevel: "Nível mínimo do vendedor",
+      minSellerLevelPlaceholder: "Sem limite",
+      minSellerLevelHint: "Ex.: 7 para L7 ou mais. Vendedores abaixo do nível são descartados depois de abrir o anúncio, sem gastar a análise da IA. Se o Goofish não informar o nível, o anúncio segue normalmente.",
       seller: "Loja / vendedor (opcional)",
       sellerPlaceholder: "Link da loja ou ID do vendedor, ex.: https://www.goofish.com/personal?userId=391299371",
       sellerHint: "Quando preenchido, só os anúncios dessa loja são monitorados e não há busca por palavra-chave; a palavra-chave vira um filtro de título (deixe vazia para analisar todos os anúncios). A faixa de preço continua valendo.",
@@ -184,6 +187,8 @@ const ptBRExtra = {
       invalid_file: "Arquivo de login ilegível",
       error: "Falha na verificação",
       noX5sec: "Sem o cookie x5sec: o Goofish pode desafiar o scraper. Navegue normalmente no Goofish por 3–5 minutos no seu navegador e exporte o login de novo.",
+      x5secExpired: "O cookie anti-bot (x5sec) venceu: clique em “Resolver verificação”.",
+      x5secSoon: "O cookie anti-bot (x5sec) vence em cerca de {hours} h.",
       checkedAt: "Verificado: {time}",
     },
     verify: {

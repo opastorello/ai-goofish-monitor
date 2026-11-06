@@ -89,6 +89,15 @@ function missingAntiBotCookie(entry?: StatusEntry): boolean {
   return Boolean(entry?.result?.valid && cookies && !cookies.x5sec)
 }
 
+function x5secExpiryHint(entry?: StatusEntry): string {
+  const raw = entry?.result?.x5sec_expires_at
+  if (!raw || !entry?.result?.valid) return ''
+  const hours = (new Date(raw).getTime() - Date.now()) / 3_600_000
+  if (hours <= 0) return t('accounts.status.x5secExpired')
+  if (hours < 4) return t('accounts.status.x5secSoon', { hours: Math.max(1, Math.round(hours)) })
+  return ''
+}
+
 function statusHint(entry?: StatusEntry): string {
   if (!entry) return ''
   if (entry.error) return entry.error
@@ -407,6 +416,7 @@ onMounted(() => {
                 <span v-if="statusHint(statuses[account.name])" class="break-all text-xs text-slate-500">{{ statusHint(statuses[account.name]) }}</span>
               </div>
               <p v-if="missingAntiBotCookie(statuses[account.name])" class="text-xs text-amber-700">{{ t('accounts.status.noX5sec') }}</p>
+              <p v-else-if="x5secExpiryHint(statuses[account.name])" class="text-xs text-amber-700">{{ x5secExpiryHint(statuses[account.name]) }}</p>
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" class="flex-1 min-w-[120px]" :disabled="statuses[account.name]?.loading" @click="checkStatus(account.name)">{{ t('accounts.status.check') }}</Button>
@@ -441,6 +451,7 @@ onMounted(() => {
                     <Badge variant="outline" :class="statusClass(statuses[account.name])">{{ statusLabel(statuses[account.name]) }}</Badge>
                     <p v-if="statusHint(statuses[account.name])" class="max-w-[260px] break-all text-xs text-slate-500">{{ statusHint(statuses[account.name]) }}</p>
                     <p v-if="missingAntiBotCookie(statuses[account.name])" class="max-w-[260px] text-xs text-amber-700">{{ t('accounts.status.noX5sec') }}</p>
+                    <p v-else-if="x5secExpiryHint(statuses[account.name])" class="max-w-[260px] text-xs text-amber-700">{{ x5secExpiryHint(statuses[account.name]) }}</p>
                   </div>
                 </TableCell>
                 <TableCell class="text-right">

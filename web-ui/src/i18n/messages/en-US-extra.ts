@@ -52,6 +52,9 @@ const enUSExtra = {
       maxItems: "Items per run",
       maxItemsPlaceholder: "No limit",
       maxItemsHint: "Maximum new items processed in one run; leave empty for no limit. A small value lowers the chance of triggering Goofish verification, and the remaining items are picked up on the next run.",
+      minSellerLevel: "Minimum seller level",
+      minSellerLevelPlaceholder: "No limit",
+      minSellerLevelHint: "E.g. 7 for L7 or higher. Sellers below the level are dropped after the listing is opened, without spending AI analysis. If Goofish does not report a level, the listing proceeds normally.",
       seller: "Store / seller (optional)",
       sellerPlaceholder: "Store link or seller ID, e.g. https://www.goofish.com/personal?userId=391299371",
       sellerHint: "When set, only that store's listings are monitored and no keyword search runs; the keyword becomes a title filter (leave it empty to analyze every listing). The price range still applies.",
@@ -184,6 +187,8 @@ const enUSExtra = {
       invalid_file: "Login state file unreadable",
       error: "Check failed",
       noX5sec: "No x5sec cookie: Goofish may challenge the scraper. Browse Goofish normally for 3-5 minutes in your browser, then export the login again.",
+      x5secExpired: "The anti-bot cookie (x5sec) has expired: click “Solve verification”.",
+      x5secSoon: "The anti-bot cookie (x5sec) expires in about {hours} h.",
       checkedAt: "Checked: {time}",
     },
     verify: {

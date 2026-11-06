@@ -89,6 +89,16 @@ As demais opções estão em "Configuração" mais abaixo.
 - `Decisão por palavras-chave`: informe as regras de palavras-chave; a tarefa é criada diretamente, sem passar pela geração por IA.
 - `Filtro regional`: agora é um seletor de província / cidade / distrito, com dados embutidos a partir de um snapshot da página do Xianyu.
 
+## Proteção contra bloqueios e qualidade do vendedor
+
+- **Triagem por título**: uma única chamada à IA por página descarta anúncios que claramente não servem, antes de abrir o detalhe.
+- **Limite por execução e balde de fichas**: poucos detalhes por minuto, para não acionar a verificação do Goofish.
+- **Resfriamento por conta**: ao detectar o bloqueio (`FAIL_SYS_USER_VALIDATE`), a conta pausa por 30 min. Veja e libere na tela **Contas**.
+- **Resolver verificação**: na tela **Contas**, o botão abre um Chrome com a conta para você resolver o slider. O monitor guarda o `x5sec` e libera a conta.
+- **Sessão sempre fresca**: o token `_m_h5_tk` é renovado a cada 30 min em segundo plano, e a tela Contas avisa quando o `x5sec` está perto de vencer.
+- **Nível do vendedor**: cada anúncio analisado guarda o nível (L4, L5…), a taxa de avaliações positivas, a taxa de resposta e o tempo de conta. Na tarefa, **Nível mínimo do vendedor** descarta vendedores abaixo do nível sem gastar a análise da IA (se o Goofish não informar o nível, o anúncio segue).
+- O arquivo de login em `state/` pode ser o formato do Playwright ou uma lista simples de cookies exportada por extensão.
+
 ## Guia do usuário
 
 <details>

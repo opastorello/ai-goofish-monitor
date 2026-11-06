@@ -249,6 +249,8 @@ function handleSubmit() {
 
   const maxItems = Number(submitData.max_items_per_run)
   submitData.max_items_per_run = Number.isInteger(maxItems) && maxItems > 0 ? maxItems : null
+  const minLevel = Number(submitData.min_seller_level)
+  submitData.min_seller_level = Number.isInteger(minLevel) && minLevel > 0 ? minLevel : null
   submitData.seller_id = typeof submitData.seller_id === 'string' ? submitData.seller_id.trim() : ''
   submitData.decision_mode = decisionMode
   submitData.account_strategy = currentAccountStrategy
@@ -286,6 +288,13 @@ function handleSubmit() {
         <div class="space-y-1 sm:col-span-3">
           <Input id="max-items" v-model="form.max_items_per_run" type="number" min="1" :placeholder="t('tasks.form.maxItemsPlaceholder')" />
           <p class="text-xs text-gray-500">{{ t('tasks.form.maxItemsHint') }}</p>
+        </div>
+      </div>
+      <div class="grid gap-2 sm:grid-cols-4 sm:items-center sm:gap-4">
+        <Label for="min-seller-level" class="sm:text-right">{{ t('tasks.form.minSellerLevel') }}</Label>
+        <div class="space-y-1 sm:col-span-3">
+          <Input id="min-seller-level" v-model="form.min_seller_level" type="number" min="1" :placeholder="t('tasks.form.minSellerLevelPlaceholder')" />
+          <p class="text-xs text-gray-500">{{ t('tasks.form.minSellerLevelHint') }}</p>
         </div>
       </div>
       <div class="grid gap-2 sm:grid-cols-4 sm:items-center sm:gap-4">
