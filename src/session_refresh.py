@@ -38,6 +38,12 @@ def token_expiry_seconds(cookies: list[dict], *, now: Optional[float] = None) ->
     return None
 
 
+def _login_call(http: httpx.Client, jar: dict[str, str], user_agent: str):
+    from src.services.login_status_service import _call
+
+    return _call(http, jar, user_agent)
+
+
 def refresh_session(state_path: str, *, client: Optional[httpx.Client] = None, min_remaining: float = 45 * 60) -> dict[str, Any]:
     """Refresh the token when it is missing or about to expire. Returns a small report."""
     report: dict[str, Any] = {"state": state_path, "refreshed": False, "reason": ""}
@@ -59,16 +65,14 @@ def refresh_session(state_path: str, *, client: Optional[httpx.Client] = None, m
     jar = {c["name"]: c["value"] for c in cookies if c.get("name") and c.get("value") is not None}
     user_agent = ((state.get("headers") or {}).get("User-Agent")
                   or (state.get("headers") or {}).get("user-agent") or DEFAULT_USER_AGENT)
-    params = {"jsv": "2.7.2", "appKey": APP_KEY, "t": str(int(time.time() * 1000)),
-              "sign": "1", "v": "1.0", "type": "originaljson", "dataType": "json"}
-    headers = {"user-agent": user_agent, "origin": "https://www.goofish.com",
-               "referer": "https://www.goofish.com/",
-               "cookie": "; ".join(f"{k}={v}" for k, v in jar.items())}
     owns = client is None
     http = client or httpx.Client(timeout=15.0)
     try:
-        response = http.get(f"{MTOP_HOST}/h5/mtop.common.getTimestamp/1.0/", params=params, headers=headers)
-    except httpx.HTTPError as exc:
+        # A correctly signed call with a stale token makes mtop answer
+        # FAIL_SYS_TOKEN_EXOIRED *with* fresh _m_h5_tk cookies (an unsigned
+        # getTimestamp call never issues one).
+        _, response = _login_call(http, jar, user_agent)
+    except (httpx.HTTPError, ValueError) as exc:
         report["reason"] = f"request failed: {exc}"
         return report
     finally:

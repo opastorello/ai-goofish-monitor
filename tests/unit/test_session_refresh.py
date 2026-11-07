@@ -30,7 +30,10 @@ def test_refreshes_expired_token(tmp_path):
     path = tmp_path / "a.json"
     _write(path, [_cookie("cookie2", "c"), _cookie("_m_h5_tk", "old_1000")])
 
+    seen = {}
+
     def handler(request):
+        seen["url"] = str(request.url)
         return httpx.Response(200, json={"ret": ["SUCCESS"]},
                               headers=[("set-cookie", "_m_h5_tk=new_9999999999999; Path=/; Domain=goofish.com"),
                                        ("set-cookie", "_m_h5_tk_enc=enc; Path=/; Domain=goofish.com")])
@@ -38,6 +41,8 @@ def test_refreshes_expired_token(tmp_path):
     client = httpx.Client(transport=httpx.MockTransport(handler))
     report = refresh_session(str(path), client=client)
     assert report["refreshed"]
+    # must be a *signed* call: an unsigned getTimestamp never issues a new token
+    assert "loginuser" in seen["url"] and "sign=" in seen["url"] and "sign=1&" not in seen["url"]
     saved = {c["name"]: c["value"] for c in json.loads(path.read_text())["cookies"]}
     assert saved["_m_h5_tk"] == "new_9999999999999"
     assert saved["cookie2"] == "c"
